@@ -75,10 +75,8 @@ pub fn cbc_encrypt(plaintext: &[u8], key: &[u8], iv: &[u8]) -> Result<Vec<u8>> {
     let cipher = Aes128::new(key);
     let mut block_spot = [0u8; 16];
     let mut previous_block = iv.to_vec();
-    for i in 0..plaintext.len() / block_size {
-        let start = i * block_size;
-        let end = start + block_size;
-        block_spot.clone_from_slice(&plaintext[start..end]);
+    for chunk in plaintext.chunks(block_size) {
+        block_spot.clone_from_slice(chunk);
         block_spot
             .iter_mut()
             .zip(previous_block.iter())
@@ -93,7 +91,7 @@ pub fn cbc_encrypt(plaintext: &[u8], key: &[u8], iv: &[u8]) -> Result<Vec<u8>> {
     Ok(ciphertext)
 }
 
-pub fn cbc_decrypt(ciphertext: &[u8], iv: &[u8], key: &[u8]) -> Vec<u8> {
+pub fn cbc_decrypt(ciphertext: &[u8], key: &[u8], iv: &[u8]) -> Result<Vec<u8>> {
     let mut plaintext = Vec::new();
     let block_size = 16;
     let key = GenericArray::from_slice(key);
@@ -117,7 +115,7 @@ pub fn cbc_decrypt(ciphertext: &[u8], iv: &[u8], key: &[u8]) -> Vec<u8> {
             });
         plaintext.extend(block.as_slice());
     }
-    pkcs7_pad(plaintext.as_slice(), 16)
+    pkcs7_unpad(plaintext.as_slice())
 }
 
 // returns was_ecb, ciphertext
@@ -136,9 +134,9 @@ pub fn ecb_cbc_encryption_oracle(my_input: &[u8]) -> (bool, Vec<u8>) {
         .take(random_number_of_bytes_to_append)
         .collect();
 
-    let mut my_padded_input = random_bytes_to_prepend.clone();
+    let mut my_padded_input = random_bytes_to_prepend;
     my_padded_input.extend(my_input);
-    my_padded_input.extend(random_bytes_to_append.clone());
+    my_padded_input.extend(random_bytes_to_append);
     let my_padded_input = pkcs7_pad(&my_padded_input, 16);
 
     let random_key: Vec<u8> = (&mut rng).sample_iter(Standard).take(16).collect();
@@ -377,7 +375,7 @@ pub fn crack_challenge_14_oracle() -> Vec<u8> {
         let target_block_dictionary = (0..255)
             .map(|i| {
                 let mut my_input =vec![];
-                my_input.extend_from_slice(&*aaaa_for_prefix_padding);
+                my_input.extend_from_slice(&aaaa_for_prefix_padding);
                 my_input.extend_from_slice(target_plaintext_block_prefix);
                 my_input.extend_from_slice(&[i as u8; 1]);
                 (challenge_14_oracle(&my_input)[prefix_plus_padding_offset..prefix_plus_padding_offset + 16].to_vec(), i)

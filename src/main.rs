@@ -2,6 +2,8 @@ pub mod aes_fun;
 pub mod cryptopal_util;
 pub mod englishness;
 pub mod pkcs7;
+mod silly_webserver_for_challenge_13;
+mod silly_webserver_for_challenge_16;
 
 fn main() {
     println!("Hello, world! try running the tests :)");
@@ -11,6 +13,8 @@ fn main() {
 mod tests {
     use crate::aes_fun::{crack_challenge_12_oracle, crack_challenge_14_oracle, is_ecb};
     use crate::{aes_fun, cryptopal_util, englishness, pkcs7};
+    use crate::silly_webserver_for_challenge_13::challenge_13_attack;
+    use crate::silly_webserver_for_challenge_16::challenge_16_attack;
 
     #[test]
     fn s1c1_hex_to_b64() {
@@ -133,11 +137,14 @@ mod tests {
         assert_eq!(iv.len(), 16);
         let my_output = cryptopal_util::bytes_to_ascii(aes_fun::cbc_decrypt(
             data.as_slice(),
-            iv.as_slice(),
             key.as_slice(),
-        ))
+            iv.as_slice(),
+        ).unwrap())
         .unwrap();
-        assert_eq!(&my_output[..33], "I'm back and I'm ringin' the bell")
+        assert_eq!(&my_output[..33], "I'm back and I'm ringin' the bell");
+        let re_encrypt = aes_fun::cbc_encrypt(my_output.as_bytes(), key.as_slice(), iv.as_slice())
+            .unwrap();
+        assert_eq!(re_encrypt, data);
     }
 
     #[test]
@@ -159,7 +166,7 @@ mod tests {
 
     #[test]
     fn s2c13_ecb_cutnpaste() {
-        unimplemented!()
+        assert!(challenge_13_attack().unwrap());
     }
 
     #[test]
@@ -167,6 +174,30 @@ mod tests {
         let whoop = cryptopal_util::bytes_to_ascii(crack_challenge_14_oracle()).unwrap();
         assert_eq!("Rollin' in my 5.0\nWith my rag-top down so my hair can blow\nThe girlies on standby waving just to say hi\nDid you stop? No, I just drove by\n", whoop);
     }
+
+    #[test]
+    fn s2c15_pkcs7_padding_validation() {
+        // The string:
+        //
+        // "ICE ICE BABY\x04\x04\x04\x04"
+        // ... has valid padding, and produces the result "ICE ICE BABY".
+        //
+        // The string:
+        //
+        // "ICE ICE BABY\x05\x05\x05\x05"
+        // ... does not have valid padding, nor does:
+        //
+        // "ICE ICE BABY\x01\x02\x03\x04"
+        assert!(pkcs7::pkcs7_unpad(&cryptopal_util::ascii_to_bytes("ICE ICE BABY\x04\x04\x04\x04").unwrap()).is_ok());
+        assert!(pkcs7::pkcs7_unpad(&cryptopal_util::ascii_to_bytes("ICE ICE BABY\x05\x05\x05\x05").unwrap()).is_err());
+        assert!(pkcs7::pkcs7_unpad(&cryptopal_util::ascii_to_bytes("ICE ICE BABY\x01\x02\x03\x04").unwrap()).is_err());
+    }
+
+    #[test]
+    fn s2c16_cbc_bitflipping() {
+        assert!(challenge_16_attack().unwrap());
+    }
+
 
 
 }
