@@ -1,8 +1,8 @@
-use anyhow::Result;
-use std::collections::HashMap;
-use rand::Rng;
-use crate::{aes_fun, cryptopal_util};
 use crate::pkcs7::pkcs7_pad;
+use crate::{aes_fun, cryptopal_util};
+use anyhow::Result;
+use rand::Rng;
+use std::collections::HashMap;
 
 lazy_static::lazy_static! {
     pub static ref MY_RANDOM_KEY: Vec<u8> = {
@@ -90,7 +90,8 @@ pub fn encrypt_user_profile_and_return(email: String) -> Result<Vec<u8>> {
     let key = MY_RANDOM_KEY.as_slice();
     let input = profile_for(email.as_str());
     let encoded_input = encode_profile(&input);
-    let output = aes_fun::aes_ecb_mode_encrypt(&cryptopal_util::ascii_to_bytes(&encoded_input)?, key);
+    let output =
+        aes_fun::aes_ecb_mode_encrypt(&cryptopal_util::ascii_to_bytes(&encoded_input)?, key);
     Ok(output)
 }
 
@@ -112,12 +113,13 @@ pub fn challenge_13_attack() -> Result<bool> {
     // "email=" is 6 characters long
     // "&uid=10&role=" is 13 characters long
     // padding email= up to the block border
-    let mut attack1 = vec![b'A'; 16-6];
+    let mut attack1 = vec![b'A'; 16 - 6];
     // and making a new admin block
     let admin_cute_string = pkcs7_pad(&cryptopal_util::ascii_to_bytes("admin")?, 16);
     attack1.extend_from_slice(&admin_cute_string);
     attack1.extend_from_slice("psh".as_bytes());
-    let encrypted_user_profile = encrypt_user_profile_and_return(cryptopal_util::bytes_to_ascii(attack1)?)?;
+    let encrypted_user_profile =
+        encrypt_user_profile_and_return(cryptopal_util::bytes_to_ascii(attack1)?)?;
     let admin_suffix = &encrypted_user_profile[16..32];
     let mut attack2 = encrypted_user_profile[0..16].to_vec();
     attack2.extend_from_slice(&encrypted_user_profile[32..(32 + 16)]);

@@ -70,6 +70,7 @@ dependencies = [
  "hex",
  "lazy_static",
  "rand",
+ "rand_mt",
 ]
 
 [[package]]
@@ -154,6 +155,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d34f1408f55294453790c48b2f1ebbb1c5b4b7563eb1f418bcfcfdbb06ebb4e7"
 dependencies = [
  "getrandom",
+]
+
+[[package]]
+name = "rand_mt"
+version = "4.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6cf6dbbecdfb1522a112f5ecb746c3093e2743819f79d454502d142dd53c48e0"
+dependencies = [
+ "rand_core",
 ]
 
 [[package]]

@@ -1,9 +1,13 @@
+#![feature(bigint_helper_methods)]
+
 pub mod aes_fun;
 pub mod cryptopal_util;
 pub mod englishness;
+mod mersenne_twister;
 pub mod pkcs7;
 mod silly_webserver_for_challenge_13;
 mod silly_webserver_for_challenge_16;
+mod silly_webserver_for_challenge_17;
 
 fn main() {
     println!("Hello, world! try running the tests :)");
@@ -12,9 +16,11 @@ fn main() {
 #[cfg(test)]
 mod tests {
     use crate::aes_fun::{crack_challenge_12_oracle, crack_challenge_14_oracle, is_ecb};
-    use crate::{aes_fun, cryptopal_util, englishness, pkcs7};
+    use crate::mersenne_twister::MersenneTwister;
     use crate::silly_webserver_for_challenge_13::challenge_13_attack;
     use crate::silly_webserver_for_challenge_16::challenge_16_attack;
+    use crate::{aes_fun, cryptopal_util, englishness, pkcs7};
+    use rand_mt::Mt19937GenRand32;
 
     #[test]
     fn s1c1_hex_to_b64() {
@@ -135,15 +141,13 @@ mod tests {
         )
         .unwrap();
         assert_eq!(iv.len(), 16);
-        let my_output = cryptopal_util::bytes_to_ascii(aes_fun::cbc_decrypt(
-            data.as_slice(),
-            key.as_slice(),
-            iv.as_slice(),
-        ).unwrap())
+        let my_output = cryptopal_util::bytes_to_ascii(
+            aes_fun::cbc_decrypt(data.as_slice(), key.as_slice(), iv.as_slice()).unwrap(),
+        )
         .unwrap();
         assert_eq!(&my_output[..33], "I'm back and I'm ringin' the bell");
-        let re_encrypt = aes_fun::cbc_encrypt(my_output.as_bytes(), key.as_slice(), iv.as_slice())
-            .unwrap();
+        let re_encrypt =
+            aes_fun::cbc_encrypt(my_output.as_bytes(), key.as_slice(), iv.as_slice()).unwrap();
         assert_eq!(re_encrypt, data);
     }
 
@@ -188,9 +192,18 @@ mod tests {
         // ... does not have valid padding, nor does:
         //
         // "ICE ICE BABY\x01\x02\x03\x04"
-        assert!(pkcs7::pkcs7_unpad(&cryptopal_util::ascii_to_bytes("ICE ICE BABY\x04\x04\x04\x04").unwrap()).is_ok());
-        assert!(pkcs7::pkcs7_unpad(&cryptopal_util::ascii_to_bytes("ICE ICE BABY\x05\x05\x05\x05").unwrap()).is_err());
-        assert!(pkcs7::pkcs7_unpad(&cryptopal_util::ascii_to_bytes("ICE ICE BABY\x01\x02\x03\x04").unwrap()).is_err());
+        assert!(pkcs7::pkcs7_unpad(
+            &cryptopal_util::ascii_to_bytes("ICE ICE BABY\x04\x04\x04\x04").unwrap()
+        )
+        .is_ok());
+        assert!(pkcs7::pkcs7_unpad(
+            &cryptopal_util::ascii_to_bytes("ICE ICE BABY\x05\x05\x05\x05").unwrap()
+        )
+        .is_err());
+        assert!(pkcs7::pkcs7_unpad(
+            &cryptopal_util::ascii_to_bytes("ICE ICE BABY\x01\x02\x03\x04").unwrap()
+        )
+        .is_err());
     }
 
     #[test]
@@ -198,6 +211,265 @@ mod tests {
         assert!(challenge_16_attack().unwrap());
     }
 
+    #[test]
+    fn s3c17_cbc_padding_oracle() {
+        unimplemented!();
+    }
 
+    #[test]
+    fn s3c18_implement_ctr() {
+        unimplemented!();
+    }
 
+    #[test]
+    fn s3c19_break_fixednonce_ctr_substitution() {
+        unimplemented!();
+    }
+
+    #[test]
+    fn s3c20_break_fixednonce_ctr_statistically() {
+        unimplemented!();
+    }
+
+    #[test]
+    fn s3c21_implement_mt19937() {
+        // open mersenne_test_vector.txt and read the lines
+        let seed: u32 = 1131464071;
+        let mut rng = MersenneTwister::new(seed);
+
+        let mut system_rng = Mt19937GenRand32::new(seed);
+        // start grabbing randomness from rng...
+        for i in 0..1800 {
+            println!("{}", i);
+            let system_rand = system_rng.next_u32();
+            let rng_rand = rng.extract_number();
+            assert_eq!(system_rand, rng_rand);
+        }
+    }
+
+    #[test]
+    fn s3c22_crack_mt19937_seed() {
+        unimplemented!();
+    }
+
+    #[test]
+    fn s3c23_clone_mt19937_rng() {
+        unimplemented!();
+    }
+
+    #[test]
+    fn s3c24_create_mt19937_stream_cipher_and_break_it() {
+        unimplemented!();
+    }
+
+    #[test]
+    fn s4c25_break_randomaccess_readwrite() {
+        unimplemented!();
+    }
+
+    #[test]
+    fn s4c26_break_ctr_bitflipping() {
+        unimplemented!();
+    }
+
+    #[test]
+    fn s4c27_recover_key_from_cbc_with_iv_equal_to_key() {
+        unimplemented!();
+    }
+
+    #[test]
+    fn s4c28_implement_sha1_mac() {
+        unimplemented!();
+    }
+
+    #[test]
+    fn s4c29_break_sha1_mac_using_length_extension() {
+        unimplemented!();
+    }
+
+    #[test]
+    fn s4c30_break_md4_mac_using_length_extension() {
+        unimplemented!();
+    }
+
+    #[test]
+    fn s4c31_break_hmac_sha1_with_artificial_timing_leak() {
+        unimplemented!();
+    }
+
+    #[test]
+    fn s4c32_break_hmac_sha1_with_less_artificial_timing_leak() {
+        unimplemented!();
+    }
+
+    #[test]
+    fn s5c33_implement_diffie_hellman() {
+        unimplemented!();
+    }
+
+    #[test]
+    fn s5c34_implement_mitm_key_fixing_attack_on_diffie_hellman() {
+        unimplemented!();
+    }
+
+    #[test]
+    fn s5c35_implement_dh_with_negotiated_groups_and_break_with_malicious_g_parameters() {
+        unimplemented!();
+    }
+
+    #[test]
+    fn s5c36_implement_srp() {
+        unimplemented!();
+    }
+
+    #[test]
+    fn s5c37_break_srp_with_zero_key() {
+        unimplemented!();
+    }
+
+    #[test]
+    fn s5c38_offline_dictionary_attack_on_simplified_srp() {
+        unimplemented!();
+    }
+
+    #[test]
+    fn s5c39_implement_rsa() {
+        unimplemented!();
+    }
+
+    #[test]
+    fn s5c40_implement_e_3_rsa_broadcast_attack() {
+        unimplemented!();
+    }
+
+    #[test]
+    fn s6c41_implement_unpadded_message_recovery_oracle() {
+        unimplemented!();
+    }
+
+    #[test]
+    fn s6c42_bleichenbacher_rsa_attack() {
+        unimplemented!();
+    }
+
+    #[test]
+    fn s6c43_dsa_key_recovery_from_nonce() {
+        unimplemented!();
+    }
+
+    #[test]
+    fn s6c44_dsa_nonce_recovery_from_repeated_nonce() {
+        unimplemented!();
+    }
+
+    #[test]
+    fn s6c45_dsa_parameter_tampering() {
+        unimplemented!();
+    }
+
+    #[test]
+    fn s6c46_rsa_parity_oracle() {
+        unimplemented!();
+    }
+
+    #[test]
+    fn s6c47_bleichenbacher_pkcs_15_padding_oracle_simple_case() {
+        unimplemented!();
+    }
+
+    #[test]
+    fn s6c48_bleichenbacher_pkcs_15_padding_oracle_complete_case() {
+        unimplemented!();
+    }
+
+    #[test]
+    fn s7c49_cbc_mac_message_forgery() {
+        unimplemented!();
+    }
+
+    #[test]
+    fn s7c50_hashing_with_cbc_mac() {
+        unimplemented!();
+    }
+
+    #[test]
+    fn s7c51_compression_ratio_side_channel_attacks() {
+        unimplemented!();
+    }
+
+    #[test]
+    fn s7c52_iterated_hash_function_multicollisions() {
+        unimplemented!();
+    }
+
+    #[test]
+    fn s7c53_kelsey_and_schneier_expandable_messages() {
+        unimplemented!();
+    }
+
+    #[test]
+    fn s7c54_kelsey_and_kohno_nostradamus_attack() {
+        unimplemented!();
+    }
+
+    #[test]
+    fn s7c55_md4_collisions() {
+        unimplemented!();
+    }
+
+    #[test]
+    fn s7c56_rc4_single_byte_biases() {
+        unimplemented!();
+    }
+
+    #[test]
+    fn s8c57_diffie_hellman_small_subgroup_confinement() {
+        unimplemented!();
+    }
+
+    #[test]
+    fn s8c58_pollards_method_for_catching_kangaroos() {
+        unimplemented!();
+    }
+
+    #[test]
+    fn s8c59_elliptic_curve_diffie_hellman_and_invalid_curve_attacks() {
+        unimplemented!();
+    }
+
+    #[test]
+    fn s8c60_single_coordinate_ladders_and_insecure_twists() {
+        unimplemented!();
+    }
+
+    #[test]
+    fn s8c61_duplicate_signature_key_selection_in_ecdsa_and_rsa() {
+        unimplemented!();
+    }
+
+    #[test]
+    fn s8c62_key_recovery_attacks_on_ecdsa_with_biased_nonces() {
+        unimplemented!();
+    }
+
+    #[test]
+    fn s8c63_key_recovery_attacks_on_gcm_with_repeated_nonces() {
+        unimplemented!();
+    }
+
+    #[test]
+    fn s8c64_key_recovery_attacks_on_gcm_with_a_truncated_mac() {
+        unimplemented!();
+    }
+
+    #[test]
+    fn s8c65_truncated_mac_gcm_revisited_improving_the_key_recovery_attack_via_ciphertext_length_extension(
+    ) {
+        unimplemented!();
+    }
+
+    #[test]
+    fn s8c66_exploiting_implementation_errors_in_diffie_hellman() {
+        unimplemented!();
+    }
 }

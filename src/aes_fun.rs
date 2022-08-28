@@ -349,7 +349,10 @@ pub fn crack_challenge_14_oracle() -> Vec<u8> {
         let aaaa_for_prefix = vec![b'A'; prefix_length];
         let aaaa_for_prefix_padding = vec![b'A'; 16 - (prefix_length % 16)];
         let aaaa_for_offset = vec![b'A'; 15 - (text_string.len() % 16)];
-        assert_eq!((aaaa_for_prefix.len() + aaaa_for_prefix_padding.len()) % 16, 0);
+        assert_eq!(
+            (aaaa_for_prefix.len() + aaaa_for_prefix_padding.len()) % 16,
+            0
+        );
         let mut plaintext_up_to_known = vec![];
         plaintext_up_to_known.extend_from_slice(&aaaa_for_prefix);
         plaintext_up_to_known.extend_from_slice(&aaaa_for_prefix_padding);
@@ -374,11 +377,16 @@ pub fn crack_challenge_14_oracle() -> Vec<u8> {
         //    Make a dictionary of every possible last byte by feeding different strings to the oracle; for instance, "AAAAAAAA", "AAAAAAAB", "AAAAAAAC", remembering the first block of each invocation.
         let target_block_dictionary = (0..255)
             .map(|i| {
-                let mut my_input =vec![];
+                let mut my_input = vec![];
                 my_input.extend_from_slice(&aaaa_for_prefix_padding);
                 my_input.extend_from_slice(target_plaintext_block_prefix);
                 my_input.extend_from_slice(&[i as u8; 1]);
-                (challenge_14_oracle(&my_input)[prefix_plus_padding_offset..prefix_plus_padding_offset + 16].to_vec(), i)
+                (
+                    challenge_14_oracle(&my_input)
+                        [prefix_plus_padding_offset..prefix_plus_padding_offset + 16]
+                        .to_vec(),
+                    i,
+                )
             })
             .collect::<HashMap<Vec<u8>, u8>>();
         //    Match the output of the one-byte-short input to one of the entries in your dictionary. You've now discovered the first byte of unknown-string.

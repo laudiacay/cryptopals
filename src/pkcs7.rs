@@ -15,7 +15,10 @@ pub fn pkcs7_unpad(input: &[u8]) -> Result<Vec<u8>> {
         return Err(anyhow!("Invalid padding"));
     }
     let mut output = input.to_vec();
-    if output[output.len() - padding_size..].iter().any(|&b| b != padding_size as u8) {
+    if output[output.len() - padding_size..]
+        .iter()
+        .any(|&b| b != padding_size as u8)
+    {
         return Err(anyhow!("Invalid padding"));
     }
     output.truncate(output.len() - padding_size);
