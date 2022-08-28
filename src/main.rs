@@ -5,9 +5,7 @@ pub mod cryptopal_util;
 pub mod englishness;
 mod mersenne_twister;
 pub mod pkcs7;
-mod silly_webserver_for_challenge_13;
-mod silly_webserver_for_challenge_16;
-mod silly_webserver_for_challenge_17;
+mod random_things;
 
 fn main() {
     println!("Hello, world! try running the tests :)");
@@ -15,10 +13,7 @@ fn main() {
 
 #[cfg(test)]
 mod tests {
-    use crate::aes_fun::{crack_challenge_12_oracle, crack_challenge_14_oracle, is_ecb};
     use crate::mersenne_twister::MersenneTwister;
-    use crate::silly_webserver_for_challenge_13::challenge_13_attack;
-    use crate::silly_webserver_for_challenge_16::challenge_16_attack;
     use crate::{aes_fun, cryptopal_util, englishness, pkcs7};
     use rand_mt::Mt19937GenRand32;
 
@@ -104,10 +99,9 @@ mod tests {
         let filename = "./data/7.txt";
         let bytes = cryptopal_util::read_bytes_from_b64_file(filename.to_string()).unwrap();
         let key = cryptopal_util::ascii_to_bytes("YELLOW SUBMARINE").unwrap();
-        let my_output = cryptopal_util::bytes_to_ascii(
-            aes_fun::aes_ecb_mode_decrypt(&bytes, key.as_slice()).unwrap(),
-        )
-        .unwrap();
+        let my_output =
+            cryptopal_util::bytes_to_ascii(aes_fun::ecb::decrypt(&bytes, key.as_slice()).unwrap())
+                .unwrap();
         assert_eq!(&my_output[..33], "I'm back and I'm ringin' the bell")
     }
 
@@ -119,7 +113,7 @@ mod tests {
             .iter()
             .map(|hex| cryptopal_util::hex_to_bytes(hex.to_string()).unwrap())
             .collect();
-        let my_output = aes_fun::find_aes_ecb_ciphertexts(binary_lines);
+        let my_output = aes_fun::ecb::find_aes_ecb_ciphertexts(binary_lines);
         assert_eq!(my_output.len(), 1);
     }
 
@@ -142,12 +136,12 @@ mod tests {
         .unwrap();
         assert_eq!(iv.len(), 16);
         let my_output = cryptopal_util::bytes_to_ascii(
-            aes_fun::cbc_decrypt(data.as_slice(), key.as_slice(), iv.as_slice()).unwrap(),
+            aes_fun::cbc::decrypt(data.as_slice(), key.as_slice(), iv.as_slice()).unwrap(),
         )
         .unwrap();
         assert_eq!(&my_output[..33], "I'm back and I'm ringin' the bell");
         let re_encrypt =
-            aes_fun::cbc_encrypt(my_output.as_bytes(), key.as_slice(), iv.as_slice()).unwrap();
+            aes_fun::cbc::encrypt(my_output.as_bytes(), key.as_slice(), iv.as_slice()).unwrap();
         assert_eq!(re_encrypt, data);
     }
 
@@ -155,8 +149,8 @@ mod tests {
     fn s2c11_ecb_cbc_detection_oracle() {
         for _ in 0..=30 {
             let oracle_input = [b'a'; 70];
-            let (was_ecb, oracle_output) = aes_fun::ecb_cbc_encryption_oracle(&oracle_input);
-            assert_eq!(is_ecb(oracle_output.as_slice()), was_ecb);
+            let (was_ecb, oracle_output) = aes_fun::challenge_11::oracle(&oracle_input);
+            assert_eq!(aes_fun::ecb::is_ecb(oracle_output.as_slice()), was_ecb);
         }
     }
 
@@ -164,18 +158,18 @@ mod tests {
     fn s2c12_byte_at_a_time_ecb_decryption() {
         // I JUST WANT YOU ALL TO KNOW THAT I GOT THIS ON THE FIRST GODDAMN TRY!!!!!!! GET FUCKED LMAOOOOFDSAJKLFDSJAKLFJDSKLA
         let oh_my_god_i_cant_believe_i_got_this_in_one_run =
-            cryptopal_util::bytes_to_ascii(crack_challenge_12_oracle()).unwrap();
+            cryptopal_util::bytes_to_ascii(aes_fun::challenge_12::attack()).unwrap();
         assert_eq!("Rollin' in my 5.0\nWith my rag-top down so my hair can blow\nThe girlies on standby waving just to say hi\nDid you stop? No, I just drove by\n", oh_my_god_i_cant_believe_i_got_this_in_one_run);
     }
 
     #[test]
     fn s2c13_ecb_cutnpaste() {
-        assert!(challenge_13_attack().unwrap());
+        assert!(aes_fun::challenge_13::attack().unwrap());
     }
 
     #[test]
     fn s2c14_byte_at_a_time_ecb_decryption_harder() {
-        let whoop = cryptopal_util::bytes_to_ascii(crack_challenge_14_oracle()).unwrap();
+        let whoop = cryptopal_util::bytes_to_ascii(aes_fun::challenge_14::attack()).unwrap();
         assert_eq!("Rollin' in my 5.0\nWith my rag-top down so my hair can blow\nThe girlies on standby waving just to say hi\nDid you stop? No, I just drove by\n", whoop);
     }
 
@@ -208,7 +202,7 @@ mod tests {
 
     #[test]
     fn s2c16_cbc_bitflipping() {
-        assert!(challenge_16_attack().unwrap());
+        assert!(aes_fun::challenge_16::attack().unwrap());
     }
 
     #[test]
