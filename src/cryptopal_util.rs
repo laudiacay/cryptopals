@@ -19,8 +19,8 @@ pub fn bytes_to_b64(bytes: &[u8]) -> String {
     base64::encode(bytes)
 }
 
-pub fn bytes_to_ascii(bytes: Vec<u8>) -> Result<String> {
-    Ok(String::from_utf8(bytes)?)
+pub fn bytes_to_ascii(bytes: &[u8]) -> Result<String> {
+    Ok(String::from_utf8(bytes.to_owned())?)
 }
 
 pub fn ascii_to_bytes(ascii_string: &str) -> Result<Vec<u8>> {
@@ -28,11 +28,21 @@ pub fn ascii_to_bytes(ascii_string: &str) -> Result<Vec<u8>> {
 }
 
 pub fn fixed_xor(bytes1: &[u8], bytes2: &[u8]) -> Vec<u8> {
-    bytes1
-        .iter()
-        .zip(bytes2.iter())
-        .map(|(b1, b2)| b1 ^ b2)
-        .collect()
+    if bytes1.len() <= bytes2.len() {
+        // truncate bytes2 if it's too long
+        bytes1
+            .iter()
+            .zip(bytes2.iter().take(bytes1.len()))
+            .map(|(b1, b2)| b1 ^ b2)
+            .collect()
+    } else {
+        // truncate bytes1 if it's too long
+        bytes1
+            .iter()
+            .zip(bytes2.iter().take(bytes2.len()))
+            .map(|(b1, b2)| b1 ^ b2)
+            .collect()
+    }
 }
 
 pub fn read_lines_from_file(filename: String) -> Result<Vec<String>> {

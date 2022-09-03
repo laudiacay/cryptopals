@@ -89,7 +89,7 @@ fn encrypt_user_profile_and_return(email: String) -> Result<Vec<u8>> {
 fn decrypt_user_profile_return_if_admin(ciphertext: Vec<u8>) -> Result<bool> {
     let key = MY_RANDOM_KEY.as_slice();
     let output = aes_fun::ecb::decrypt(&ciphertext, key)?;
-    let output = cryptopal_util::bytes_to_ascii(output)?;
+    let output = cryptopal_util::bytes_to_ascii(&output)?;
     let profile = parse_kv(&output)?;
     if profile.get("role").unwrap() == "admin" {
         Ok(true)
@@ -110,7 +110,7 @@ pub fn attack() -> Result<bool> {
     attack1.extend_from_slice(&admin_cute_string);
     attack1.extend_from_slice("psh".as_bytes());
     let encrypted_user_profile =
-        encrypt_user_profile_and_return(cryptopal_util::bytes_to_ascii(attack1)?)?;
+        encrypt_user_profile_and_return(cryptopal_util::bytes_to_ascii(&attack1)?)?;
     let admin_suffix = &encrypted_user_profile[16..32];
     let mut attack2 = encrypted_user_profile[0..16].to_vec();
     attack2.extend_from_slice(&encrypted_user_profile[32..(32 + 16)]);

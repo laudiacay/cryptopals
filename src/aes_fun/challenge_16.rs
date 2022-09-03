@@ -44,7 +44,7 @@ fn target(input_bytes: &[u8]) -> Result<bool> {
 pub fn attack() -> Result<bool> {
     let length_1 = "comment1=cooking%20MCs;userdata=".len();
     let output = [b'A'; 16 * 8];
-    let mut encrypted = oracle(cryptopal_util::bytes_to_ascii(output.to_vec())?)?;
+    let mut encrypted = oracle(cryptopal_util::bytes_to_ascii(&output)?)?;
     let jokes_and_tricks = cryptopal_util::fixed_xor(
         &cryptopal_util::ascii_to_bytes(";admin=true;")?,
         &cryptopal_util::ascii_to_bytes("AAAAAAAAAAAA")?,

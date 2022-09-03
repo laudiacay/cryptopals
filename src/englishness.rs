@@ -319,7 +319,7 @@ fn untranspose_bytes(bytes: &[Vec<u8>], keysize: u32) -> Vec<u8> {
     untransposed_bytes
 }
 
-fn break_repeating_key_xor_with_keysize(
+pub fn break_repeating_key_xor_with_keysize(
     bytes: Vec<u8>,
     keysize: u32,
 ) -> (EnglishnessScores, Vec<u8>, Vec<u8>) {
