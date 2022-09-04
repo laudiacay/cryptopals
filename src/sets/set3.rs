@@ -28,7 +28,7 @@ mod tests {
     fn s3c18_implement_ctr() {
         let encrypted = "L77na/nrFsKvynd6HzOoG7GHTLXsTVu9qvY/2syLXzhPweyyMTJULu/6/kXX0KSvoOLSFQ==";
         let key = "YELLOW SUBMARINE";
-        let encrypted_bytes = cryptopal_util::b64_to_bytes(encrypted).unwrap();
+        let encrypted_bytes = cryptopal_util::b64_to_bytes(encrypted.to_string()).unwrap();
         let key_bytes = cryptopal_util::ascii_to_bytes(key).unwrap();
         let decrypted_bytes =
             aes_fun::ctr::decrypt(encrypted_bytes.as_slice(), key_bytes.as_slice(), 0).unwrap();

@@ -33,7 +33,7 @@ fn encryption_oracle() -> Result<Vec<u8>> {
     // pick a random string from STRINGS
     let random_string = &STRINGS[rand::random::<usize>() % STRINGS.len()];
     // decode the string
-    let decoded_string = cryptopal_util::b64_to_bytes(random_string)?;
+    let decoded_string = cryptopal_util::b64_to_bytes(random_string.to_string())?;
     // encrypt the string
     aes_fun::cbc::encrypt(&decoded_string, &MY_RANDOM_KEY, &MY_RANDOM_IV)
 }

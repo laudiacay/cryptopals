@@ -11,7 +11,7 @@ pub fn bytes_to_hex(bytes: &[u8]) -> String {
     hex::encode(bytes)
 }
 
-pub fn b64_to_bytes(b64_string: &str) -> Result<Vec<u8>> {
+pub fn b64_to_bytes(b64_string: String) -> Result<Vec<u8>> {
     Ok(base64::decode(b64_string)?)
 }
 
@@ -53,7 +53,7 @@ pub fn read_lines_from_file(filename: String) -> Result<Vec<String>> {
 }
 
 pub fn read_bytes_from_b64_file(filename: String) -> Result<Vec<u8>> {
-    let bytes = b64_to_bytes(&read_lines_from_file(filename)?.join(""))?;
+    let bytes = b64_to_bytes(read_lines_from_file(filename)?.join(""))?;
     Ok(bytes)
 }
 

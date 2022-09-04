@@ -6,7 +6,7 @@ pub fn attack() -> Result<Vec<u8>> {
     let lines = cryptopal_util::read_lines_from_file("./data/20.txt".to_string())?;
     let bytes = lines
         .iter()
-        .map(|line| cryptopal_util::b64_to_bytes(line))
+        .map(|line| cryptopal_util::b64_to_bytes(line.to_string()))
         .collect::<Result<Vec<Vec<u8>>>>()?;
     // take minimum of all the bytes' lengths
     let min_len = bytes.iter().map(|b| b.len()).min().unwrap();

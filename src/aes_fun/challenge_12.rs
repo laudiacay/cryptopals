@@ -5,7 +5,7 @@ use std::collections::HashMap;
 
 fn oracle(my_input: &[u8]) -> Vec<u8> {
     let base64_thing_to_append = "Um9sbGluJyBpbiBteSA1LjAKV2l0aCBteSByYWctdG9wIGRvd24gc28gbXkgaGFpciBjYW4gYmxvdwpUaGUgZ2lybGllcyBvbiBzdGFuZGJ5IHdhdmluZyBqdXN0IHRvIHNheSBoaQpEaWQgeW91IHN0b3A/IE5vLCBJIGp1c3QgZHJvdmUgYnkK";
-    let bytes_to_append = cryptopal_util::b64_to_bytes(base64_thing_to_append).unwrap();
+    let bytes_to_append = cryptopal_util::b64_to_bytes(base64_thing_to_append.to_string()).unwrap();
     // AES-128-ECB(your-string || unknown-string, random-key)
     let mut my_input = my_input.to_vec();
     my_input.extend(bytes_to_append);
