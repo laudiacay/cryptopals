@@ -1,4 +1,6 @@
 use core::num::Wrapping;
+use rand::Rng;
+use std::iter;
 
 const N: usize = 624;
 const M: u32 = 397;
@@ -102,6 +104,77 @@ pub fn crack_mersenne_seed_from_timestamp(now: u32, output: u32) -> u32 {
         }
     }
     panic!("No seed found");
+}
+
+// Create the MT19937 stream cipher and break it
+// You can create a trivial stream cipher out of any PRNG; use it to generate a sequence of 8 bit outputs and call those outputs a keystream. XOR each byte of plaintext with each successive byte of keystream.
+//
+// Write the function that does this for MT19937 using a 16-bit seed. Verify that you can encrypt and decrypt properly. This code should look similar to your CTR code.
+pub fn mersenne_stream_cipher_encrypt(key: u16, plaintext: &[u8]) -> Vec<u8> {
+    let mut mt = MersenneTwister::new(key as u32);
+    let mut ciphertext = Vec::new();
+    for plaintext_byte in plaintext.iter() {
+        ciphertext.push(mt.extract_number() as u8 ^ plaintext_byte);
+    }
+    ciphertext
+}
+
+pub fn mersenne_stream_cipher_decrypt(key: u16, ciphertext: &[u8]) -> Vec<u8> {
+    mersenne_stream_cipher_encrypt(key, ciphertext)
+}
+
+// Use your function to encrypt a known plaintext (say, 14 consecutive 'A' characters) prefixed by a random number of random characters.
+pub fn oracle_smallkey() -> (u16, Vec<u8>) {
+    let mut rng = rand::thread_rng();
+    let key = rng.gen_range(0..0xffff);
+    let plaintext_length = rng.gen_range(0..100);
+    // generate plaintext_length bytes of random data
+    let mut plaintext: Vec<u8> = Vec::new();
+    for _ in 0..plaintext_length {
+        plaintext.push(rng.gen_range(0..0xff));
+    }
+    plaintext.extend(iter::repeat(b'a').take(14));
+    let ciphertext = mersenne_stream_cipher_encrypt(key, &plaintext);
+    (key, ciphertext)
+}
+pub fn oracle_timekey(current_time: u32) -> (u16, Vec<u8>) {
+    let key = current_time as u16;
+    let mut rng = rand::thread_rng();
+    let plaintext_length = rng.gen_range(0..100);
+    // generate plaintext_length bytes of random data
+    let mut plaintext: Vec<u8> = Vec::new();
+    for _ in 0..plaintext_length {
+        plaintext.push(rng.gen_range(0..0xff));
+    }
+    plaintext.extend(iter::repeat(b'a').take(14));
+    let ciphertext = mersenne_stream_cipher_encrypt(key, &plaintext);
+    (key, ciphertext)
+}
+
+//
+// From the ciphertext, recover the "key" (the 16 bit seed).
+//
+// Use the same idea to generate a random "password reset token" using MT19937 seeded from the current time.
+//
+// Write a function to check if any given password token is actually the product of an MT19937 PRNG seeded with the current time.
+pub fn mersenne_stream_cipher_crack_smallkey(ciphertext: &[u8]) -> u16 {
+    for key in 0..=65535 {
+        let plaintext = mersenne_stream_cipher_decrypt(key, ciphertext);
+        if plaintext.iter().rev().take(14).all(|&x| x == b'a') {
+            return key;
+        }
+    }
+    panic!("No key found");
+}
+// Write a function to check if any given password token is actually the product of an MT19937 PRNG seeded with the current time.
+pub fn mersenne_stream_cipher_crack_timekey(current_time: u32, ciphertext: &[u8]) -> u16 {
+    for key in current_time - 10000..current_time {
+        let plaintext = mersenne_stream_cipher_decrypt(key as u16, ciphertext);
+        if plaintext.iter().rev().take(14).all(|&x| x == b'a') {
+            return key as u16;
+        }
+    }
+    panic!("No key found");
 }
 
 #[cfg(test)]

@@ -1,7 +1,6 @@
 #[cfg(test)]
 mod tests {
     use crate::cryptopal_util::current_unix_timestamp;
-    use crate::mersenne_twister::{crack_mersenne_seed_from_timestamp, MersenneTwister};
     use crate::{aes_fun, cryptopal_util, mersenne_twister};
     use rand_mt::Mt19937GenRand32;
     use std::collections::HashSet;
@@ -53,7 +52,7 @@ mod tests {
     fn s3c21_implement_mt19937() {
         // open mersenne_test_vector.txt and read the lines
         let seed: u32 = 1131464071;
-        let mut rng = MersenneTwister::new(seed);
+        let mut rng = mersenne_twister::MersenneTwister::new(seed);
 
         let mut system_rng = Mt19937GenRand32::new(seed);
         // start grabbing randomness from rng...
@@ -83,11 +82,12 @@ mod tests {
         // wait a random number of seconds between 40 and 1000
         current_unix += rand::random::<u32>() % 960 + 40;
         let original_seed = current_unix;
-        let mut rng = MersenneTwister::new(current_unix);
+        let mut rng = mersenne_twister::MersenneTwister::new(current_unix);
         // wait a random number of seconds again
         current_unix += rand::random::<u32>() % 960 + 40;
         let first_output = rng.extract_number();
-        let cracked_seed = crack_mersenne_seed_from_timestamp(current_unix, first_output);
+        let cracked_seed =
+            mersenne_twister::crack_mersenne_seed_from_timestamp(current_unix, first_output);
         assert_eq!(cracked_seed, original_seed);
     }
 
@@ -95,7 +95,7 @@ mod tests {
     fn s3c23_clone_mt19937_rng() {
         // create an rng
         let seed = rand::random::<u32>();
-        let mut rng = MersenneTwister::new(seed);
+        let mut rng = mersenne_twister::MersenneTwister::new(seed);
         // make 624 outputs
         let mut outputs: Vec<u32> = Vec::new();
         for _ in 0..624 {
@@ -111,6 +111,17 @@ mod tests {
 
     #[test]
     fn s3c24_create_mt19937_stream_cipher_and_break_it() {
-        unimplemented!();
+        let (key, ciphertext) = mersenne_twister::oracle_smallkey();
+        assert_eq!(
+            mersenne_twister::mersenne_stream_cipher_crack_smallkey(&ciphertext),
+            key
+        );
+        let mut current_unix = current_unix_timestamp();
+        let (key, ciphertext) = mersenne_twister::oracle_timekey(current_unix);
+        current_unix += rand::random::<u32>() % 960 + 40;
+        assert_eq!(
+            mersenne_twister::mersenne_stream_cipher_crack_timekey(current_unix, &ciphertext),
+            key
+        );
     }
 }
