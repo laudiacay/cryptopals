@@ -6,7 +6,8 @@ mod tests {
         let input = "YELLOW SUBMARINE";
         let output = "YELLOW SUBMARINE\x04\x04\x04\x04";
         let input_bytes = cryptopal_util::ascii_to_bytes(input).unwrap();
-        let my_output = cryptopal_util::bytes_to_ascii(&pkcs7::pkcs7_pad(&input_bytes, 20)).unwrap();
+        let my_output =
+            cryptopal_util::bytes_to_ascii(&pkcs7::pkcs7_pad(&input_bytes, 20)).unwrap();
         assert_eq!(my_output, output);
     }
 
@@ -20,13 +21,9 @@ mod tests {
         .unwrap();
         assert_eq!(iv.len(), 16);
         let decrypted_bytes = aes_fun::cbc::decrypt(&data, &key, &iv).unwrap();
-        let my_output = cryptopal_util::bytes_to_ascii(&
-            decrypted_bytes
-        )
-        .unwrap();
+        let my_output = cryptopal_util::bytes_to_ascii(&decrypted_bytes).unwrap();
         assert_eq!(&my_output[..33], "I'm back and I'm ringin' the bell");
-        let re_encrypt =
-            aes_fun::cbc::encrypt(&decrypted_bytes, &key, &iv).unwrap();
+        let re_encrypt = aes_fun::cbc::encrypt(&decrypted_bytes, &key, &iv).unwrap();
         assert_eq!(re_encrypt, data);
     }
 

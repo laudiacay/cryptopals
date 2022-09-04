@@ -11,7 +11,7 @@ pub fn pkcs7_pad(input: &[u8], block_size: usize) -> Vec<u8> {
 
 pub fn pkcs7_unpad(input: &[u8]) -> Result<Vec<u8>> {
     let padding_size = input[input.len() - 1] as usize;
-    if padding_size > input.len() {
+    if padding_size > input.len() || padding_size == 0 {
         return Err(anyhow!("Invalid padding"));
     }
     let mut output = input.to_vec();

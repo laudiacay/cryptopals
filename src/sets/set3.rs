@@ -3,9 +3,24 @@ mod tests {
     use crate::mersenne_twister::MersenneTwister;
     use crate::{aes_fun, cryptopal_util};
     use rand_mt::Mt19937GenRand32;
+    use std::collections::HashSet;
     #[test]
     fn s3c17_cbc_padding_oracle() {
-        unimplemented!();
+        let output_bytes = aes_fun::challenge_17::challenge_17_attack().unwrap();
+        let output_string = cryptopal_util::bytes_to_ascii(&output_bytes).unwrap();
+        println!("{}", output_string);
+        let mut outputs: HashSet<String> = HashSet::new();
+        outputs.insert("000000Now that the party is jumping".to_string());
+        outputs.insert("000001With the bass kicked in and the Vega's are pumpin'".to_string());
+        outputs.insert("000002Quick to the point, to the point, no faking".to_string());
+        outputs.insert("000003Cooking MC's like a pound of bacon".to_string());
+        outputs.insert("000004Burning 'em, if you ain't quick and nimble".to_string());
+        outputs.insert("000005I go crazy when I hear a cymbal".to_string());
+        outputs.insert("000006And a high hat with a souped up tempo".to_string());
+        outputs.insert("000007I'm on a roll, it's time to go solo".to_string());
+        outputs.insert("000008ollin' in my five point oh".to_string());
+        outputs.insert("000009ith my rag-top down so my hair can blow".to_string());
+        assert!(outputs.contains(&output_string));
     }
 
     #[test]
@@ -27,7 +42,8 @@ mod tests {
     fn s3c19c20_break_fixednonce_ctr_statistically() {
         assert_eq!(
             "I'm rated \"R\"...this is a warning, ya better void / P".to_string(),
-            cryptopal_util::bytes_to_ascii(&aes_fun::challenge_19_and_20::attack().unwrap()).unwrap()[..53]
+            cryptopal_util::bytes_to_ascii(&aes_fun::challenge_19_and_20::attack().unwrap())
+                .unwrap()[..53]
         );
     }
 

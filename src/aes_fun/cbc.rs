@@ -27,7 +27,7 @@ pub fn encrypt(plaintext: &[u8], key: &[u8], iv: &[u8]) -> Result<Vec<u8>> {
     Ok(ciphertext)
 }
 
-pub fn decrypt(ciphertext: &[u8], key: &[u8], iv: &[u8]) -> Result<Vec<u8>> {
+pub fn decrypt_no_unpad(ciphertext: &[u8], key: &[u8], iv: &[u8]) -> Vec<u8> {
     let mut plaintext = Vec::new();
     let block_size = 16;
     let key = GenericArray::from_slice(key);
@@ -51,5 +51,10 @@ pub fn decrypt(ciphertext: &[u8], key: &[u8], iv: &[u8]) -> Result<Vec<u8>> {
             });
         plaintext.extend(block.as_slice());
     }
+    plaintext
+}
+
+pub fn decrypt(ciphertext: &[u8], key: &[u8], iv: &[u8]) -> Result<Vec<u8>> {
+    let plaintext = decrypt_no_unpad(ciphertext, key, iv);
     pkcs7_unpad(plaintext.as_slice())
 }
