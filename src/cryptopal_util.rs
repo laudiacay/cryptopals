@@ -83,6 +83,14 @@ pub fn hamming_distance(bytes1: &[u8], bytes2: &[u8]) -> usize {
     distance
 }
 
+pub fn current_unix_timestamp() -> u32 {
+    use std::time::{SystemTime, UNIX_EPOCH};
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_secs() as u32
+}
+
 #[cfg(test)]
 mod tests {
     use crate::cryptopal_util::{ascii_to_bytes, hamming_distance};

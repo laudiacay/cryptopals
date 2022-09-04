@@ -1,9 +1,11 @@
 #[cfg(test)]
 mod tests {
-    use crate::mersenne_twister::MersenneTwister;
-    use crate::{aes_fun, cryptopal_util};
+    use crate::cryptopal_util::current_unix_timestamp;
+    use crate::mersenne_twister::{crack_mersenne_seed_from_timestamp, MersenneTwister};
+    use crate::{aes_fun, cryptopal_util, mersenne_twister};
     use rand_mt::Mt19937GenRand32;
     use std::collections::HashSet;
+
     #[test]
     fn s3c17_cbc_padding_oracle() {
         let output_bytes = aes_fun::challenge_17::challenge_17_attack().unwrap();
@@ -65,12 +67,46 @@ mod tests {
 
     #[test]
     fn s3c22_crack_mt19937_seed() {
-        unimplemented!();
+        // Crack an MT19937 seed
+        // Make sure your MT19937 accepts an integer seed value. Test it (verify that you're getting the same sequence of outputs given a seed).
+        //
+        // Write a routine that performs the following operation:
+        //
+        // Wait a random number of seconds between, I don't know, 40 and 1000.
+        // Seeds the RNG with the current Unix timestamp
+        // Waits a random number of seconds again.
+        // Returns the first 32 bit output of the RNG.
+        // You get the idea. Go get coffee while it runs. Or just simulate the passage of time, although you're missing some of the fun of this exercise if you do that.
+        //
+        // From the 32 bit RNG output, discover the seed.
+        let mut current_unix = current_unix_timestamp();
+        // wait a random number of seconds between 40 and 1000
+        current_unix += rand::random::<u32>() % 960 + 40;
+        let original_seed = current_unix;
+        let mut rng = MersenneTwister::new(current_unix);
+        // wait a random number of seconds again
+        current_unix += rand::random::<u32>() % 960 + 40;
+        let first_output = rng.extract_number();
+        let cracked_seed = crack_mersenne_seed_from_timestamp(current_unix, first_output);
+        assert_eq!(cracked_seed, original_seed);
     }
 
     #[test]
     fn s3c23_clone_mt19937_rng() {
-        unimplemented!();
+        // create an rng
+        let seed = rand::random::<u32>();
+        let mut rng = MersenneTwister::new(seed);
+        // make 624 outputs
+        let mut outputs: Vec<u32> = Vec::new();
+        for _ in 0..624 {
+            outputs.push(rng.extract_number());
+        }
+        // clone the rng
+        let mut cloned_rng = mersenne_twister::reconstruct_mersenne_state(outputs.as_slice());
+        //check that they're synced <3
+        for _ in 0..1000 {
+            assert_eq!(rng.extract_number(), cloned_rng.extract_number());
+        }
     }
 
     #[test]
