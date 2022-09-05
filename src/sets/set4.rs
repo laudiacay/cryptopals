@@ -24,6 +24,11 @@ mod tests {
 
     #[test]
     fn s4c28_implement_sha1_mac() {
+        //Write a function to authenticate a message under a secret key by using a secret-prefix MAC, which is simply:
+        //
+        // SHA1(key || message)
+        // Verify that you cannot tamper with the message without breaking the MAC you've produced, and that you can't produce a new MAC without knowing the secret key.
+
         unimplemented!();
     }
 
