@@ -14,7 +14,7 @@ mod tests {
 
     #[test]
     fn s4c26_break_ctr_bitflipping() {
-
+        unimplemented!();
     }
 
     #[test]

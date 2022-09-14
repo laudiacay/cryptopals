@@ -9,11 +9,11 @@
 //
 // Recover the original plaintext.
 
-use std::iter;
 use crate::aes_fun::ctr;
+use crate::cryptopal_util;
 use crate::random_things::MY_RANDOM_KEY;
 use anyhow::Result;
-use crate::cryptopal_util;
+use std::iter;
 
 pub fn encrypt(plaintext: &[u8]) -> Vec<u8> {
     ctr::encrypt(plaintext, &MY_RANDOM_KEY, 0)
@@ -32,6 +32,12 @@ pub fn edit_api(ciphertext: &[u8], offset: usize, newtext: &[u8]) -> Result<Vec<
 }
 
 pub fn attack(ciphertext: &[u8]) -> Result<Vec<u8>> {
-    let res = edit_api(ciphertext, 0, &iter::repeat(0u8).take(ciphertext.len()).collect::<Vec<u8>>())?;
+    let res = edit_api(
+        ciphertext,
+        0,
+        &iter::repeat(0u8)
+            .take(ciphertext.len())
+            .collect::<Vec<u8>>(),
+    )?;
     Ok(cryptopal_util::fixed_xor(&res, ciphertext))
 }
