@@ -13,12 +13,13 @@ mod tests {
         // "A" and "B" are public keys. Generate a session key with them; set "s" to "B" raised to the "a" power mod 37 --- s = (B**a) % p.
         //
         // Do the same with A**b, check that you come up with the same "s".
-        diffie_hellman::diffie_hellman(37.into(), 5.into(), 18.into(), 17.into());
+        diffie_hellman::diffie_hellman(37_u32.into(), 5_u32.into(), 18_u32.into(), 17_u32.into());
         unimplemented!();
     }
 
     #[test]
     fn s5c34_implement_mitm_key_fixing_attack_on_diffie_hellman() {
+        diffie_hellman::challenge_34::normal_diffie_hellman_message_exchange();
         unimplemented!();
     }
 

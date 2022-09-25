@@ -14,3 +14,9 @@ lazy_static::lazy_static! {
         key.to_vec()
     };
 }
+
+pub fn sixteen_random_bytes() -> Vec<u8> {
+    let mut key = [0u8; 16];
+    rand::thread_rng().fill(&mut key);
+    key.to_vec()
+}

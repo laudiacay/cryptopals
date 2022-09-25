@@ -3,6 +3,7 @@ use crate::random_things::MY_RANDOM_KEY;
 use crate::{aes_fun, cryptopal_util};
 use anyhow::Result;
 use std::collections::HashMap;
+use aes_fun::Key;
 
 // Write a k=v parsing routine, as if for a structured cookie. The routine should take:
 //
@@ -82,13 +83,13 @@ fn encrypt_user_profile_and_return(email: String) -> Result<Vec<u8>> {
     let key = MY_RANDOM_KEY.as_slice();
     let input = profile_for(email.as_str());
     let encoded_input = encode_profile(&input);
-    let output = aes_fun::ecb::encrypt(&cryptopal_util::ascii_to_bytes(&encoded_input)?, key);
+    let output = aes_fun::ecb::encrypt(&cryptopal_util::ascii_to_bytes(&encoded_input)?, Key(key));
     Ok(output)
 }
 
 fn decrypt_user_profile_return_if_admin(ciphertext: Vec<u8>) -> Result<bool> {
     let key = MY_RANDOM_KEY.as_slice();
-    let output = aes_fun::ecb::decrypt(&ciphertext, key)?;
+    let output = aes_fun::ecb::decrypt(&ciphertext, Key(key))?;
     let output = cryptopal_util::bytes_to_ascii(&output)?;
     let profile = parse_kv(&output)?;
     if profile.get("role").unwrap() == "admin" {

@@ -4,6 +4,7 @@ mod tests {
     use crate::{aes_fun, cryptopal_util, mersenne_twister};
     use rand_mt::Mt19937GenRand32;
     use std::collections::HashSet;
+    pub use crate::aes_fun::Key;
 
     #[test]
     fn s3c17_cbc_padding_oracle() {
@@ -31,7 +32,7 @@ mod tests {
         let encrypted_bytes = cryptopal_util::b64_to_bytes(encrypted.to_string()).unwrap();
         let key_bytes = cryptopal_util::ascii_to_bytes(key).unwrap();
         let decrypted_bytes =
-            aes_fun::ctr::decrypt(encrypted_bytes.as_slice(), key_bytes.as_slice(), 0).unwrap();
+            aes_fun::ctr::decrypt(encrypted_bytes.as_slice(), Key(key_bytes.as_slice()), 0).unwrap();
         // printstring
         assert_eq!(
             cryptopal_util::bytes_to_ascii(&decrypted_bytes).unwrap(),

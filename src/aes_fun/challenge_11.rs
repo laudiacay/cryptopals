@@ -1,4 +1,4 @@
-use crate::aes_fun::{cbc, ecb};
+use crate::aes_fun::{cbc, ecb, Iv, Key};
 use crate::pkcs7::pkcs7_pad;
 use rand::distributions::Standard;
 use rand::Rng;
@@ -28,11 +28,11 @@ pub fn oracle(my_input: &[u8]) -> (bool, Vec<u8>) {
 
     let coin_flip = rand::thread_rng().gen_range(0..2);
     if coin_flip == 1 {
-        let my_ciphertext = ecb::encrypt(&my_padded_input, &random_key);
+        let my_ciphertext = ecb::encrypt(&my_padded_input, Key(&random_key));
         (true, my_ciphertext)
     } else {
         let random_iv: Vec<u8> = (&mut rng).sample_iter(Standard).take(16).collect();
-        let my_ciphertext = cbc::encrypt(&my_padded_input, &random_key, &random_iv).unwrap();
+        let my_ciphertext = cbc::encrypt(&my_padded_input, Key(&random_key), Iv(&random_iv)).unwrap();
         (false, my_ciphertext)
     }
 }

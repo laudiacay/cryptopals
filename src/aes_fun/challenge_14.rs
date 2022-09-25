@@ -1,9 +1,10 @@
 use crate::aes_fun::ecb;
-use crate::cryptopal_util;
+use crate::{aes_fun, cryptopal_util};
 use crate::random_things::MY_RANDOM_KEY;
 use rand::distributions::Standard;
 use rand::Rng;
 use std::collections::HashMap;
+use aes_fun::Key;
 
 lazy_static::lazy_static! {
     static ref CHALLENGE_14_RANDOM_PREFIX: Vec<u8> = {
@@ -19,7 +20,7 @@ fn oracle(my_input: &[u8]) -> Vec<u8> {
     let mut my_new_input = CHALLENGE_14_RANDOM_PREFIX.to_vec();
     my_new_input.extend(my_input);
     my_new_input.extend(bytes_to_append);
-    ecb::encrypt(&my_new_input, &MY_RANDOM_KEY)
+    ecb::encrypt(&my_new_input, Key(&MY_RANDOM_KEY))
 }
 
 fn compute_prefix_length() -> usize {

@@ -1,6 +1,7 @@
 #[cfg(test)]
 mod tests {
     use crate::{aes_fun, cryptopal_util, englishness};
+    use crate::aes_fun::Key;
 
     #[test]
     fn s1c1_hex_to_b64() {
@@ -85,7 +86,7 @@ mod tests {
         let bytes = cryptopal_util::read_bytes_from_b64_file(filename.to_string()).unwrap();
         let key = cryptopal_util::ascii_to_bytes("YELLOW SUBMARINE").unwrap();
         let my_output =
-            cryptopal_util::bytes_to_ascii(&aes_fun::ecb::decrypt(&bytes, key.as_slice()).unwrap())
+            cryptopal_util::bytes_to_ascii(&aes_fun::ecb::decrypt(&bytes, Key(key.as_slice())).unwrap())
                 .unwrap();
         assert_eq!(&my_output[..33], "I'm back and I'm ringin' the bell")
     }

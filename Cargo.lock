@@ -78,6 +78,7 @@ dependencies = [
  "num",
  "rand",
  "rand_mt",
+ "sha1_smol",
 ]
 
 [[package]]
@@ -151,6 +152,7 @@ dependencies = [
  "autocfg",
  "num-integer",
  "num-traits",
+ "rand",
 ]
 
 [[package]]
@@ -160,6 +162,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7ae39348c8bc5fbd7f40c727a9925f03517afd2ab27d46702108b6a7e5414c19"
 dependencies = [
  "num-traits",
+ "rand",
 ]
 
 [[package]]
@@ -248,6 +251,12 @@ checksum = "6cf6dbbecdfb1522a112f5ecb746c3093e2743819f79d454502d142dd53c48e0"
 dependencies = [
  "rand_core",
 ]
+
+[[package]]
+name = "sha1_smol"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ae1a47186c03a32177042e55dbc5fd5aee900b8e0069a8d70fba96a9375cd012"
 
 [[package]]
 name = "typenum"

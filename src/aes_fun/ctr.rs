@@ -1,6 +1,7 @@
 use crate::cryptopal_util;
 use aes::cipher::{generic_array::GenericArray, BlockEncrypt, KeyInit};
 use aes::Aes128;
+use super::{Key};
 use anyhow::Result;
 
 //The string:
@@ -35,14 +36,14 @@ use anyhow::Result;
 // Decrypt the string at the top of this function, then use your CTR function to encrypt and decrypt other things.
 
 /// returns new_iv, keystream
-fn keystream(key: &[u8], nonce: u64, start_iv: u64, bytes_to_produce: usize) -> (u64, Vec<u8>) {
+fn keystream(key: Key, nonce: u64, start_iv: u64, bytes_to_produce: usize) -> (u64, Vec<u8>) {
     // round up bytes_to_produce
     let bytes_to_produce = (bytes_to_produce + 15) / 16 * 16;
     let mut keystream = vec![0_u8; bytes_to_produce];
     // how many blocks?
     let blocks_to_produce = bytes_to_produce / 16;
     let mut iv = start_iv;
-    let cipher = Aes128::new(GenericArray::from_slice(key));
+    let cipher = Aes128::new(GenericArray::from_slice(key.0));
     let mut buf = [0_u8; 16];
     for i in 0..blocks_to_produce {
         // write nonce to buf
@@ -57,13 +58,13 @@ fn keystream(key: &[u8], nonce: u64, start_iv: u64, bytes_to_produce: usize) -> 
     (iv, keystream)
 }
 
-pub fn decrypt(ciphertext: &[u8], key: &[u8], nonce: u64) -> Result<Vec<u8>> {
+pub fn decrypt(ciphertext: &[u8], key: Key, nonce: u64) -> Result<Vec<u8>> {
     let (_, keystream) = keystream(key, nonce, 0, ciphertext.len());
     let plaintext = cryptopal_util::fixed_xor(ciphertext, &keystream);
     Ok(plaintext)
 }
 
-pub fn encrypt(input: &[u8], key: &[u8], nonce: u64) -> Vec<u8> {
+pub fn encrypt(input: &[u8], key: Key, nonce: u64) -> Vec<u8> {
     let (_, keystream) = keystream(key, nonce, 0, input.len());
     cryptopal_util::fixed_xor(input, &keystream)
 }

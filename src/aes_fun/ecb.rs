@@ -2,12 +2,13 @@ use crate::pkcs7::{pkcs7_pad, pkcs7_unpad};
 use aes::cipher::{generic_array::GenericArray, BlockDecrypt, BlockEncrypt, KeyInit};
 use aes::Aes128;
 use anyhow::Result;
+use crate::aes_fun::Key;
 use std::collections::HashSet;
 
-pub fn decrypt(ciphertext: &[u8], key: &[u8]) -> Result<Vec<u8>> {
+pub fn decrypt(ciphertext: &[u8], key: Key) -> Result<Vec<u8>> {
     let mut plaintext = Vec::new();
     let block_size = 16;
-    let key = GenericArray::from_slice(key);
+    let key = GenericArray::from_slice(key.0);
     let cipher = Aes128::new(key);
     let mut block_spot = [0u8; 16];
     for chunk in ciphertext.chunks(block_size) {
@@ -19,11 +20,11 @@ pub fn decrypt(ciphertext: &[u8], key: &[u8]) -> Result<Vec<u8>> {
     Ok(pkcs7_unpad(plaintext.as_slice())?.to_vec())
 }
 
-pub fn encrypt(ciphertext: &[u8], key: &[u8]) -> Vec<u8> {
+pub fn encrypt(ciphertext: &[u8], key: Key) -> Vec<u8> {
     let ciphertext = pkcs7_pad(ciphertext, 16);
     let mut plaintext = Vec::new();
     let block_size = 16;
-    let key = GenericArray::from_slice(key);
+    let key = GenericArray::from_slice(key.0);
     let cipher = Aes128::new(key);
     let mut block_spot = [0u8; 16];
     for chunk in ciphertext.chunks(block_size) {

@@ -1,6 +1,7 @@
 use crate::random_things::{MY_RANDOM_IV, MY_RANDOM_KEY};
 use crate::{aes_fun, cryptopal_util};
 use anyhow::Result;
+use aes_fun::{Key, Iv};
 
 // The first function should take an arbitrary input string, prepend the string:
 //
@@ -17,7 +18,7 @@ fn oracle(input_string: String) -> Result<Vec<u8>> {
     output.push_str(&quoted_out);
     output.push_str(";comment2=%20like%20a%20pound%20of%20bacon");
     let output_bytes = cryptopal_util::ascii_to_bytes(&output)?;
-    aes_fun::cbc::encrypt(&output_bytes, &MY_RANDOM_KEY, &MY_RANDOM_IV)
+    aes_fun::cbc::encrypt(&output_bytes, Key(&MY_RANDOM_KEY), Iv(&MY_RANDOM_IV))
 }
 
 // The second function should decrypt the string and look for the characters ";admin=true;" (or, equivalently, decrypt, split the string on ";", convert each resulting string into 2-tuples, and look for the "admin" tuple).
@@ -25,7 +26,7 @@ fn oracle(input_string: String) -> Result<Vec<u8>> {
 // Return true or false based on whether the string exists.
 fn target(input_bytes: &[u8]) -> Result<bool> {
     // decrypt the string
-    let decrypted_bytes = aes_fun::cbc::decrypt(input_bytes, &MY_RANDOM_KEY, &MY_RANDOM_IV)?;
+    let decrypted_bytes = aes_fun::cbc::decrypt(input_bytes, Key(&MY_RANDOM_KEY), Iv(&MY_RANDOM_IV))?;
     let decrypted_string = unsafe { String::from_utf8_unchecked(decrypted_bytes) };
     // return whether it contains the characters ";admin=true;"
     Ok(decrypted_string.contains(";admin=true;"))

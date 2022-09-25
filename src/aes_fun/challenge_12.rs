@@ -2,6 +2,7 @@ use crate::aes_fun::ecb;
 use crate::cryptopal_util;
 use crate::random_things::MY_RANDOM_KEY;
 use std::collections::HashMap;
+use crate::aes_fun::Key;
 
 fn oracle(my_input: &[u8]) -> Vec<u8> {
     let base64_thing_to_append = "Um9sbGluJyBpbiBteSA1LjAKV2l0aCBteSByYWctdG9wIGRvd24gc28gbXkgaGFpciBjYW4gYmxvdwpUaGUgZ2lybGllcyBvbiBzdGFuZGJ5IHdhdmluZyBqdXN0IHRvIHNheSBoaQpEaWQgeW91IHN0b3A/IE5vLCBJIGp1c3QgZHJvdmUgYnkK";
@@ -9,7 +10,7 @@ fn oracle(my_input: &[u8]) -> Vec<u8> {
     // AES-128-ECB(your-string || unknown-string, random-key)
     let mut my_input = my_input.to_vec();
     my_input.extend(bytes_to_append);
-    ecb::encrypt(&my_input, &MY_RANDOM_KEY)
+    ecb::encrypt(&my_input, Key(&MY_RANDOM_KEY))
 }
 
 fn compute_block_size() -> usize {

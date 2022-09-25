@@ -12,6 +12,7 @@ use crate::random_things::{MY_RANDOM_IV, MY_RANDOM_KEY};
 use crate::{aes_fun, cryptopal_util};
 use anyhow::Result;
 use lazy_static::lazy_static;
+use aes_fun::{Key, Iv};
 
 lazy_static! {
     pub static ref STRINGS: Vec<String> = vec![
@@ -35,11 +36,11 @@ fn encryption_oracle() -> Result<Vec<u8>> {
     // decode the string
     let decoded_string = cryptopal_util::b64_to_bytes(random_string.to_string())?;
     // encrypt the string
-    aes_fun::cbc::encrypt(&decoded_string, &MY_RANDOM_KEY, &MY_RANDOM_IV)
+    aes_fun::cbc::encrypt(&decoded_string, Key(&MY_RANDOM_KEY), Iv(&MY_RANDOM_IV))
 }
 
 fn decryption_oracle(ciphertext: &[u8]) -> Result<()> {
-    let _ = aes_fun::cbc::decrypt(ciphertext, &MY_RANDOM_KEY, &MY_RANDOM_IV)?;
+    let _ = aes_fun::cbc::decrypt(ciphertext, Key(&MY_RANDOM_KEY), Iv(&MY_RANDOM_IV))?;
     Ok(())
 }
 

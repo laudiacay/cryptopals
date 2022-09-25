@@ -1,6 +1,8 @@
 #[cfg(test)]
 mod tests {
     use crate::{aes_fun, cryptopal_util, pkcs7};
+    pub use crate::aes_fun::{Iv, Key};
+
     #[test]
     fn s2c9_implement_pkcs7() {
         let input = "YELLOW SUBMARINE";
@@ -20,10 +22,10 @@ mod tests {
         )
         .unwrap();
         assert_eq!(iv.len(), 16);
-        let decrypted_bytes = aes_fun::cbc::decrypt(&data, &key, &iv).unwrap();
+        let decrypted_bytes = aes_fun::cbc::decrypt(&data, Key(&key), Iv(&iv)).unwrap();
         let my_output = cryptopal_util::bytes_to_ascii(&decrypted_bytes).unwrap();
         assert_eq!(&my_output[..33], "I'm back and I'm ringin' the bell");
-        let re_encrypt = aes_fun::cbc::encrypt(&decrypted_bytes, &key, &iv).unwrap();
+        let re_encrypt = aes_fun::cbc::encrypt(&decrypted_bytes, Key(&key), Iv(&iv)).unwrap();
         assert_eq!(re_encrypt, data);
     }
 

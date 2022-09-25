@@ -1,3 +1,5 @@
+pub mod challenge_34;
+
 // Implement Diffie-Hellman
 // For one of the most important algorithms in cryptography this exercise couldn't be a whole lot easier.
 //
@@ -30,27 +32,29 @@
 //
 // Note that you'll need to write your own modexp (this is blackboard math, don't freak out), because you'll blow out your bignum library raising "a" to the 1024-bit-numberth power. You can find modexp routines on Rosetta Code for most languages.
 
-use num::bigint::ToBigInt;
-use num::{BigInt, One, Zero};
+use num::bigint::ToBigUint;
+use num::{BigInt, BigUint, Num, One, Zero};
 lazy_static::lazy_static! {
-pub static ref P : BigInt = "fffffffffffffffc90fdaa22168c234c4c6628b80dc1cd129024\
-e088a67cc74020bbea63b139b22514a08798e3404ddef9519b3cd\
-3a431b302b0a6df25f14374fe1356d6d51c245e485b576625e7ec\
-6f44c42e9a637ed6b0bff5cb6f406b7edee386bfb5a899fa5ae9f\
-24117c4b1fe649286651ece45b3dc2007cb8a163bf0598da48361\
-c55d39a69163fa8fd24cf5f83655d23dca3ad961c62f356208552\
-bb9ed529077096966d670c354e4abc9804f1746c08ca237327fff\
-fffffffffffff".parse().unwrap();
-    pub static ref G : BigInt = 2.to_bigint().unwrap();
+    pub static ref P_HEX: BigInt = BigInt::from_str_radix(
+        {"ffffffffffffffffc90fdaa22168c234c4c6628b80dc1cd129024e088a67cc74\
+                     020bbea63b139b22514a08798e3404ddef9519b3cd3a431b302b0a6df25f1437\
+                     4fe1356d6d51c245e485b576625e7ec6f44c42e9a637ed6b0bff5cb6f406b7ed\
+                     ee386bfb5a899fa5ae9f24117c4b1fe649286651ece45b3dc2007cb8a163bf05\
+                     98da48361c55d39a69163fa8fd24cf5f83655d23dca3ad961c62f356208552bb\
+                     9ed529077096966d670c354e4abc9804f1746c08ca237327ffffffffffffffff"}, 16).unwrap();
+
+    pub static ref P : BigUint = P_HEX.to_biguint().unwrap();
+    pub static ref G : BigUint = 2_u32.to_biguint().unwrap();
 }
 
-// The modular_exponentiation() function takes three identical types
+// The modular_exponentiation() function
+// takes three identical types
 // (which get cast to BigInt), and returns a BigInt:
-fn modular_exponentiation<T: ToBigInt>(n: &T, e: &T, m: &T) -> BigInt {
+pub fn modular_exponentiation<T: ToBigUint>(n: &T, e: &T, m: &T) -> BigUint {
     // Convert n, e, and m to BigInt:
-    let n = n.to_bigint().unwrap();
-    let e = e.to_bigint().unwrap();
-    let m = m.to_bigint().unwrap();
+    let n = n.to_biguint().unwrap();
+    let e = e.to_biguint().unwrap();
+    let m = m.to_biguint().unwrap();
 
     // Sanity check:  Verify that the exponent is not negative:
     assert!(e >= Zero::zero());
@@ -61,13 +65,13 @@ fn modular_exponentiation<T: ToBigInt>(n: &T, e: &T, m: &T) -> BigInt {
     }
 
     // Now do the modular exponentiation algorithm:
-    let mut result: BigInt = One::one();
+    let mut result: BigUint = One::one();
     let mut base = n % &m;
     let mut exp = e;
 
     // Loop until we can return out result:
     loop {
-        if &exp % 2 == One::one() {
+        if &exp % 2u32 == One::one() {
             result *= &base;
             result %= &m;
         }
@@ -76,13 +80,13 @@ fn modular_exponentiation<T: ToBigInt>(n: &T, e: &T, m: &T) -> BigInt {
             return result;
         }
 
-        exp /= 2;
+        exp /= 2u32;
         base *= base.clone();
         base %= &m;
     }
 }
 
-pub fn diffie_hellman(p: BigInt, g: BigInt, a: BigInt, b: BigInt) -> BigInt {
+pub fn diffie_hellman(p: BigUint, g: BigUint, a: BigUint, b: BigUint) -> BigUint {
     let a_exp = modular_exponentiation(&g, &a, &p);
     let b_exp = modular_exponentiation(&g, &b, &p);
     let s1 = modular_exponentiation(&b_exp, &a, &p);
