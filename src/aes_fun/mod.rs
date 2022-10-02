@@ -11,6 +11,7 @@ pub mod challenge_17;
 pub mod challenge_19_and_20;
 pub mod challenge_25;
 pub mod challenge_26;
+pub mod challenge_27;
 
 pub struct Key<'a>(pub &'a [u8]);
 pub struct Iv<'a>(pub &'a [u8]);
