@@ -1,5 +1,6 @@
 use core::num::Wrapping;
 use rand::Rng;
+use rand_mt::Mt19937GenRand32;
 use std::iter;
 
 const N: usize = 624;
@@ -16,6 +17,17 @@ const F: Wrapping<u32> = Wrapping(1812433253);
 
 const UPPER_MASK: Wrapping<u32> = Wrapping(0x8000_0000);
 const LOWER_MASK: Wrapping<u32> = Wrapping(0x7fff_ffff);
+
+pub struct TheirMersenneTwister(Mt19937GenRand32);
+
+impl TheirMersenneTwister {
+    pub fn new(seed: u32) -> Self {
+        Self(Mt19937GenRand32::new(seed))
+    }
+    pub fn extract_number(&mut self) -> u32 {
+        self.0.next_u32()
+    }
+}
 
 pub struct MersenneTwister {
     index: usize,

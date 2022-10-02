@@ -2,9 +2,9 @@
 mod tests {
     use crate::cryptopal_util::current_unix_timestamp;
     use crate::{aes_fun, cryptopal_util, mersenne_twister};
-    use rand_mt::Mt19937GenRand32;
     use std::collections::HashSet;
     pub use crate::aes_fun::Key;
+    use crate::mersenne_twister::TheirMersenneTwister;
 
     #[test]
     fn s3c17_cbc_padding_oracle() {
@@ -55,11 +55,11 @@ mod tests {
         let seed: u32 = 1131464071;
         let mut rng = mersenne_twister::MersenneTwister::new(seed);
 
-        let mut system_rng = Mt19937GenRand32::new(seed);
+        let mut system_rng = TheirMersenneTwister::new(seed);
         // start grabbing randomness from rng...
         for i in 0..1800 {
             println!("{}", i);
-            let system_rand = system_rng.next_u32();
+            let system_rand = system_rng.extract_number();
             let rng_rand = rng.extract_number();
             assert_eq!(system_rand, rng_rand);
         }
