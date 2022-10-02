@@ -32,7 +32,8 @@ pub fn oracle(my_input: &[u8]) -> (bool, Vec<u8>) {
         (true, my_ciphertext)
     } else {
         let random_iv: Vec<u8> = (&mut rng).sample_iter(Standard).take(16).collect();
-        let my_ciphertext = cbc::encrypt(&my_padded_input, Key(&random_key), Iv(&random_iv)).unwrap();
+        let my_ciphertext =
+            cbc::encrypt(&my_padded_input, Key(&random_key), Iv(&random_iv)).unwrap();
         (false, my_ciphertext)
     }
 }

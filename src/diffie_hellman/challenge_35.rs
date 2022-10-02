@@ -1,4 +1,4 @@
-// Implement a MITM key-fixing attack on Diffie-Hellman with parameter injection
+// Implement DH with negotiated groups, and break with malicious "g" parameters
 
 use crate::aes_fun::{
     cbc::{decrypt, encrypt},
@@ -10,7 +10,7 @@ use crate::sha1::sha1;
 
 use crate::aes_fun::cbc;
 use num::bigint::RandBigInt;
-use num::{BigUint, Zero};
+use num::{BigUint, One, Zero};
 
 struct A {
     p: BigUint,
@@ -21,7 +21,9 @@ struct A {
     s: Option<BigUint>,
 }
 impl A {
-    fn new(p: BigUint, g: BigUint) -> A {
+    fn new(g: BigUint) -> A {
+        let p = P.clone();
+
         let rng = &mut rand::thread_rng();
         let secret_a = rng.gen_biguint_below(&p);
         let big_a = modular_exponentiation(&g, &secret_a, &p);
@@ -123,7 +125,7 @@ pub fn normal_diffie_hellman_message_exchange() {
 
     // A->B
     // Send "p", "g", "A"
-    let mut a_guy = A::new(P.clone(), G.clone());
+    let mut a_guy = A::new(G.clone());
     // B->A
     // Send "B"
     let b_guy = B::new(a_guy.p.clone(), a_guy.g.clone(), a_guy.big_a.clone());
@@ -143,61 +145,26 @@ pub fn normal_diffie_hellman_message_exchange() {
     );
 }
 
-// the secret is that a just encrypts with s=0 and b just encrypts with s=0
-// this happens because p ^ x mod p == 0 always lol
-//
-fn badguy_decrypt_a_to_b(enc_msg: &[u8], a_s: BigUint) -> String {
+fn badguy_decrypt(enc_msg: &[u8], a_s: BigUint) -> String {
     let key = sha1(&a_s.to_bytes_be())[..16].to_vec();
     let (encrypted, iv) = enc_msg.split_at(enc_msg.len() - 16);
     let msg = decrypt(&encrypted, Key(&key), Iv(&iv)).unwrap();
     String::from_utf8(msg).unwrap()
 }
 
-fn badguy_decrypt_b_to_a(enc_msg: &[u8], b_s: BigUint) -> String {
-    let key = sha1(&b_s.to_bytes_be())[..16].to_vec();
-    let (encrypted, iv) = enc_msg.split_at(enc_msg.len() - 16);
-    let msg = decrypt(&encrypted, Key(&key), Iv(&iv)).unwrap();
-    String::from_utf8(msg).unwrap()
-}
-
 pub fn evil_diffie_hellman_message_exchange() {
-    // M should be able to decrypt the messages. "A" and "B" in the protocol --- the public keys, over
-    // the wire --- have been swapped out with "p". Do the DH math on this quickly to see what that does
-    // to the predictability of the key.
-    //
-    // Decrypt the messages from M's vantage point as they go by.
-    //
-    // Note that you don't actually have to inject bogus parameters to make this attack work; you could
-    // just generate Ma, MA, Mb, and MB as valid DH parameters to do a generic MITM attack. But do the
-    // parameter injection attack; it's going to come up again.
-
-    // A->M
-    // Send "p", "g", "A"
-    let mut a_guy = A::new(P.clone(), G.clone());
+    // when g = 1, s = 1. so the key is just SHA1(1)[0:16]
+    let mut a_guy = A::new(BigUint::one());
     let p = a_guy.p.clone();
-    // M->B
-    // Send "p", "g", "p"
-    let b_guy = B::new(p.clone(), a_guy.g.clone(), p.clone());
-    // B->M
-    // Send "B"
-    let _big_b = b_guy.send_b();
-    // M->A
-    // Send "p"
-    a_guy.get_handshake(p.clone());
-    assert_eq!(a_guy.s, Some(BigUint::zero()));
-    assert_eq!(b_guy.s, BigUint::zero());
-    // A->M
-    // Send AES-CBC(SHA1(s)[0:16], iv=random(16), msg) + iv
+    let b_guy = B::new(p.clone(), BigUint::one(), a_guy.big_a.clone());
+    let big_b = b_guy.send_b();
+    a_guy.get_handshake(big_b.clone());
+    assert_eq!(b_guy.s, BigUint::one());
+    assert_eq!(a_guy.s, Some(BigUint::one()));
     let msg = b"hello, world!";
     let enc_msg_a = a_guy.send_msg_to_b(msg.as_slice());
 
-    // M->B
-    // Relay that to B
-    // B->M
-    // Send AES-CBC(SHA1(s)[0:16], iv=random(16), A's msg) + iv
     let (a_msg_decrypted_by_b, enc_msg_b) = b_guy.decrypt_and_send_msg_to_a(&enc_msg_a);
-    // M->A
-    // Relay that to A
     let b_msg_decrypted_by_a = a_guy.decrypt_msg_from_b(&enc_msg_b);
 
     assert_eq!(a_msg_decrypted_by_b, b_msg_decrypted_by_a);
@@ -207,10 +174,55 @@ pub fn evil_diffie_hellman_message_exchange() {
     );
     assert_eq!(
         a_msg_decrypted_by_b,
-        badguy_decrypt_a_to_b(&enc_msg_a, BigUint::zero())
+        badguy_decrypt(&enc_msg_b, BigUint::one())
+    );
+    // when g = p, s = 0. so the key is just SHA1(0)[0:16]
+    let mut a_guy = A::new(P.clone());
+    let p = a_guy.p.clone();
+    let b_guy = B::new(p.clone(), a_guy.g.clone(), a_guy.big_a.clone());
+    let big_b = b_guy.send_b();
+    a_guy.get_handshake(big_b.clone());
+    assert_eq!(a_guy.s, Some(BigUint::zero()));
+    assert_eq!(b_guy.s, BigUint::zero());
+    let msg = b"hello, world!";
+    let enc_msg_a = a_guy.send_msg_to_b(msg.as_slice());
+
+    let (a_msg_decrypted_by_b, enc_msg_b) = b_guy.decrypt_and_send_msg_to_a(&enc_msg_a);
+    let b_msg_decrypted_by_a = a_guy.decrypt_msg_from_b(&enc_msg_b);
+
+    assert_eq!(a_msg_decrypted_by_b, b_msg_decrypted_by_a);
+    assert_eq!(
+        a_msg_decrypted_by_b,
+        String::from_utf8(msg.to_vec()).unwrap()
     );
     assert_eq!(
-        b_msg_decrypted_by_a,
-        badguy_decrypt_b_to_a(&enc_msg_b, BigUint::zero())
+        a_msg_decrypted_by_b,
+        badguy_decrypt(&enc_msg_a, BigUint::zero())
+    );
+
+    // when g = p - 1, s = (p-1)^ab = p^ab + x_1 p ^(ab-1) + ... + x_i p ^2 + x_j plus/minus 1
+    //      all of these mod p are zero except for the last one, which is +- 1. so the key is just SHA1(1)[0:16]
+    //      so the key is just SHA1(p - 1)[0:16] if ab is odd, and SHA1(1)[0:16] if ab is even, i think?
+    let mut a_guy = A::new(P.clone() - BigUint::one());
+    let p = a_guy.p.clone();
+    let b_guy = B::new(p.clone(), a_guy.g.clone(), a_guy.big_a.clone());
+    let big_b = b_guy.send_b();
+    a_guy.get_handshake(big_b.clone());
+    assert_eq!(a_guy.s, Some(BigUint::one()));
+    assert_eq!(b_guy.s, BigUint::one());
+    let msg = b"hello, world!";
+    let enc_msg_a = a_guy.send_msg_to_b(msg.as_slice());
+
+    let (a_msg_decrypted_by_b, enc_msg_b) = b_guy.decrypt_and_send_msg_to_a(&enc_msg_a);
+    let b_msg_decrypted_by_a = a_guy.decrypt_msg_from_b(&enc_msg_b);
+
+    assert_eq!(a_msg_decrypted_by_b, b_msg_decrypted_by_a);
+    assert_eq!(
+        a_msg_decrypted_by_b,
+        String::from_utf8(msg.to_vec()).unwrap()
+    );
+    assert_eq!(
+        a_msg_decrypted_by_b,
+        badguy_decrypt(&enc_msg_a, BigUint::one())
     );
 }

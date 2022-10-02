@@ -10,9 +10,9 @@
 use crate::pkcs7::pkcs7_unpad;
 use crate::random_things::{MY_RANDOM_IV, MY_RANDOM_KEY};
 use crate::{aes_fun, cryptopal_util};
+use aes_fun::{Iv, Key};
 use anyhow::Result;
 use lazy_static::lazy_static;
-use aes_fun::{Key, Iv};
 
 lazy_static! {
     pub static ref STRINGS: Vec<String> = vec![

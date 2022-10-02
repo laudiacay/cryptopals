@@ -1,7 +1,7 @@
 use crate::random_things::MY_RANDOM_KEY;
 use crate::{aes_fun, cryptopal_util};
-use anyhow::Result;
 use aes_fun::Key;
+use anyhow::Result;
 
 // The first function should take an arbitrary input string, prepend the string:
 //
@@ -18,7 +18,11 @@ fn oracle(input_string: String) -> Result<Vec<u8>> {
     output.push_str(&quoted_out);
     output.push_str(";comment2=%20like%20a%20pound%20of%20bacon");
     let output_bytes = cryptopal_util::ascii_to_bytes(&output)?;
-    Ok(aes_fun::ctr::encrypt(&output_bytes, aes_fun::Key(&MY_RANDOM_KEY), 0))
+    Ok(aes_fun::ctr::encrypt(
+        &output_bytes,
+        aes_fun::Key(&MY_RANDOM_KEY),
+        0,
+    ))
 }
 
 // The second function should decrypt the string and look for the characters ";admin=true;" (or, equivalently, decrypt, split the string on ";", convert each resulting string into 2-tuples, and look for the "admin" tuple).

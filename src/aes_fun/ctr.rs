@@ -1,7 +1,7 @@
+use super::Key;
 use crate::cryptopal_util;
 use aes::cipher::{generic_array::GenericArray, BlockEncrypt, KeyInit};
 use aes::Aes128;
-use super::{Key};
 use anyhow::Result;
 
 //The string:

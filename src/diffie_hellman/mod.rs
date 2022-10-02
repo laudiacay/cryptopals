@@ -1,4 +1,5 @@
 pub mod challenge_34;
+pub mod challenge_35;
 
 // Implement Diffie-Hellman
 // For one of the most important algorithms in cryptography this exercise couldn't be a whole lot easier.

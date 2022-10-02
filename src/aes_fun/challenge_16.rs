@@ -1,7 +1,7 @@
 use crate::random_things::{MY_RANDOM_IV, MY_RANDOM_KEY};
 use crate::{aes_fun, cryptopal_util};
+use aes_fun::{Iv, Key};
 use anyhow::Result;
-use aes_fun::{Key, Iv};
 
 // The first function should take an arbitrary input string, prepend the string:
 //
@@ -26,7 +26,8 @@ fn oracle(input_string: String) -> Result<Vec<u8>> {
 // Return true or false based on whether the string exists.
 fn target(input_bytes: &[u8]) -> Result<bool> {
     // decrypt the string
-    let decrypted_bytes = aes_fun::cbc::decrypt(input_bytes, Key(&MY_RANDOM_KEY), Iv(&MY_RANDOM_IV))?;
+    let decrypted_bytes =
+        aes_fun::cbc::decrypt(input_bytes, Key(&MY_RANDOM_KEY), Iv(&MY_RANDOM_IV))?;
     let decrypted_string = unsafe { String::from_utf8_unchecked(decrypted_bytes) };
     // return whether it contains the characters ";admin=true;"
     Ok(decrypted_string.contains(";admin=true;"))

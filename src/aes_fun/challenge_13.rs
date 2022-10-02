@@ -1,9 +1,9 @@
 use crate::pkcs7::pkcs7_pad;
 use crate::random_things::MY_RANDOM_KEY;
 use crate::{aes_fun, cryptopal_util};
+use aes_fun::Key;
 use anyhow::Result;
 use std::collections::HashMap;
-use aes_fun::Key;
 
 // Write a k=v parsing routine, as if for a structured cookie. The routine should take:
 //

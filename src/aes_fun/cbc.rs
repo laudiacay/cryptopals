@@ -1,8 +1,8 @@
+use super::{Iv, Key};
 use crate::pkcs7::{pkcs7_pad, pkcs7_unpad};
 use aes::cipher::{generic_array::GenericArray, BlockDecrypt, BlockEncrypt, KeyInit};
 use aes::Aes128;
 use anyhow::Result;
-use super::{Iv, Key};
 
 pub fn encrypt(plaintext: &[u8], key: Key, iv: Iv) -> Result<Vec<u8>> {
     let plaintext = pkcs7_pad(plaintext, 16);

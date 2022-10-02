@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod tests {
-    use crate::{aes_fun, cryptopal_util, pkcs7};
     pub use crate::aes_fun::{Iv, Key};
+    use crate::{aes_fun, cryptopal_util, pkcs7};
 
     #[test]
     fn s2c9_implement_pkcs7() {

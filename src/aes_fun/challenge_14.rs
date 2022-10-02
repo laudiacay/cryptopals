@@ -1,10 +1,10 @@
 use crate::aes_fun::ecb;
-use crate::{aes_fun, cryptopal_util};
 use crate::random_things::MY_RANDOM_KEY;
+use crate::{aes_fun, cryptopal_util};
+use aes_fun::Key;
 use rand::distributions::Standard;
 use rand::Rng;
 use std::collections::HashMap;
-use aes_fun::Key;
 
 lazy_static::lazy_static! {
     static ref CHALLENGE_14_RANDOM_PREFIX: Vec<u8> = {

@@ -14,18 +14,18 @@ mod tests {
         //
         // Do the same with A**b, check that you come up with the same "s".
         diffie_hellman::diffie_hellman(37_u32.into(), 5_u32.into(), 18_u32.into(), 17_u32.into());
-        unimplemented!();
     }
 
     #[test]
     fn s5c34_implement_mitm_key_fixing_attack_on_diffie_hellman() {
         diffie_hellman::challenge_34::normal_diffie_hellman_message_exchange();
-        unimplemented!();
+        diffie_hellman::challenge_34::evil_diffie_hellman_message_exchange();
     }
 
     #[test]
     fn s5c35_implement_dh_with_negotiated_groups_and_break_with_malicious_g_parameters() {
-        unimplemented!();
+        diffie_hellman::challenge_35::normal_diffie_hellman_message_exchange();
+        diffie_hellman::challenge_35::evil_diffie_hellman_message_exchange();
     }
 
     #[test]
