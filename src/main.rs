@@ -9,6 +9,7 @@ pub mod mersenne_twister;
 pub mod pkcs7;
 mod random_things;
 pub mod sha1;
+pub mod srp;
 
 mod sets;
 

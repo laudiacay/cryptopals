@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use crate::{aes_fun, cryptopal_util};
+    use crate::{aes_fun, cryptopal_util, sha1};
 
     #[test]
     fn s4c25_break_randomaccess_readwrite() {
@@ -19,7 +19,7 @@ mod tests {
 
     #[test]
     fn s4c27_recover_key_from_cbc_with_iv_equal_to_key() {
-        unimplemented!();
+        aes_fun::challenge_27::attack().unwrap()
     }
 
     #[test]
@@ -28,8 +28,13 @@ mod tests {
         //
         // SHA1(key || message)
         // Verify that you cannot tamper with the message without breaking the MAC you've produced, and that you can't produce a new MAC without knowing the secret key.
-
-        unimplemented!();
+        let key = b"YELLOW SUBMARINE";
+        let message = b"Hello, world!";
+        let mac = sha1::mac(key, message);
+        let tampered_message = b"Hello, world! tampered";
+        let tampered_mac = sha1::mac(key, tampered_message);
+        assert_ne!(mac, tampered_mac);
+        assert!(sha1::verify_mac(key, message, &mac));
     }
 
     #[test]

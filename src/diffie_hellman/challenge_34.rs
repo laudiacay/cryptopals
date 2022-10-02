@@ -38,7 +38,7 @@ impl A {
     fn get_handshake(&mut self, big_b: BigUint) {
         self.big_b = Some(big_b.clone());
         self.s = Some(modular_exponentiation(
-            &big_b.clone(),
+            &big_b,
             &self.secret_a.clone(),
             &self.p.clone(),
         ));
@@ -51,7 +51,7 @@ impl A {
                 let key = sha1(&s.to_bytes_be())[..16].to_vec();
                 // make some random bytes for the iv
                 let iv = sixteen_random_bytes();
-                let encrypted = cbc::encrypt(&msg, Key(&key), Iv(&iv)).unwrap();
+                let encrypted = cbc::encrypt(msg, Key(&key), Iv(&iv)).unwrap();
                 let mut res = encrypted;
                 res.extend_from_slice(&iv);
                 res
@@ -70,7 +70,7 @@ impl A {
         let key = sha1(&s_bytes)[..16].to_vec();
         // make some random bytes for the iv
         let (encrypted, iv) = enc_msg.split_at(enc_msg.len() - 16);
-        let msg = decrypt(&encrypted, Key(&key), Iv(&iv)).unwrap();
+        let msg = decrypt(encrypted, Key(&key), Iv(iv)).unwrap();
         let msg = String::from_utf8(msg).unwrap();
         println!("A got message: {}", msg);
         msg
@@ -102,7 +102,7 @@ impl B {
     fn decrypt_and_send_msg_to_a(&self, enc_msg: &[u8]) -> (String, Vec<u8>) {
         let key = sha1(&(self.s.to_bytes_be()))[..16].to_vec();
         let (encrypted, iv) = enc_msg.split_at(enc_msg.len() - 16);
-        let msg = decrypt(&encrypted, Key(&key), Iv(&iv)).unwrap();
+        let msg = decrypt(encrypted, Key(&key), Iv(iv)).unwrap();
         let msg_str = String::from_utf8(msg.clone()).unwrap();
         println!("B got message: {}", msg_str);
         // re encrypt
@@ -149,14 +149,14 @@ pub fn normal_diffie_hellman_message_exchange() {
 fn badguy_decrypt_a_to_b(enc_msg: &[u8], a_s: BigUint) -> String {
     let key = sha1(&a_s.to_bytes_be())[..16].to_vec();
     let (encrypted, iv) = enc_msg.split_at(enc_msg.len() - 16);
-    let msg = decrypt(&encrypted, Key(&key), Iv(&iv)).unwrap();
+    let msg = decrypt(encrypted, Key(&key), Iv(iv)).unwrap();
     String::from_utf8(msg).unwrap()
 }
 
 fn badguy_decrypt_b_to_a(enc_msg: &[u8], b_s: BigUint) -> String {
     let key = sha1(&b_s.to_bytes_be())[..16].to_vec();
     let (encrypted, iv) = enc_msg.split_at(enc_msg.len() - 16);
-    let msg = decrypt(&encrypted, Key(&key), Iv(&iv)).unwrap();
+    let msg = decrypt(encrypted, Key(&key), Iv(iv)).unwrap();
     String::from_utf8(msg).unwrap()
 }
 
@@ -183,7 +183,7 @@ pub fn evil_diffie_hellman_message_exchange() {
     let _big_b = b_guy.send_b();
     // M->A
     // Send "p"
-    a_guy.get_handshake(p.clone());
+    a_guy.get_handshake(p);
     assert_eq!(a_guy.s, Some(BigUint::zero()));
     assert_eq!(b_guy.s, BigUint::zero());
     // A->M
