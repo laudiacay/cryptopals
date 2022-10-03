@@ -1,7 +1,9 @@
 #[cfg(test)]
 mod tests {
-
     use crate::diffie_hellman;
+    use crate::rsa::RsaKey;
+    use num::BigUint;
+
     #[test]
     fn s5c33_implement_diffie_hellman() {
         // Set a variable "p" to 37 and "g" to 5. This algorithm is so easy I'm not even going to explain it. Just do what I do.
@@ -45,7 +47,26 @@ mod tests {
 
     #[test]
     fn s5c39_implement_rsa() {
-        unimplemented!();
+        let m = BigUint::from(2u64);
+        let key = RsaKey {
+            _p: BigUint::from(3u64),
+            _q: BigUint::from(11u64),
+            modulus: BigUint::from(33u64),
+            public_exponent: BigUint::from(7u64),
+            private_exponent: BigUint::from(3u64),
+        };
+        let c = key.encrypt(&m);
+        assert_eq!(c, BigUint::from(29u64));
+        let m2 = key.decrypt(&c);
+        assert_eq!(m2, m);
+        for i in 0..30 {
+            println!("iteration {}!", i);
+            let key = RsaKey::new(20);
+            println!("key: {:?}", key);
+            let c = key.encrypt(&m);
+            let m2 = key.decrypt(&c);
+            assert_eq!(m, m2);
+        }
     }
 
     #[test]
