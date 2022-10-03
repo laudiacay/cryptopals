@@ -15,3 +15,4 @@ rand = "0.8.5"
 rand_mt = "4.2"
 num = { version = "0.4.0", features = ["rand"] }
 sha1_smol = "1.0.0"
+num-primes = "0.3.0"

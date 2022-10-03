@@ -33,8 +33,9 @@ pub mod challenge_35;
 //
 // Note that you'll need to write your own modexp (this is blackboard math, don't freak out), because you'll blow out your bignum library raising "a" to the 1024-bit-numberth power. You can find modexp routines on Rosetta Code for most languages.
 
+use crate::cryptopal_util;
 use num::bigint::ToBigUint;
-use num::{BigInt, BigUint, Num, One, Zero};
+use num::{BigInt, BigUint, Num};
 lazy_static::lazy_static! {
     pub static ref P_HEX: BigInt = BigInt::from_str_radix(
         {"ffffffffffffffffc90fdaa22168c234c4c6628b80dc1cd129024e088a67cc74\
@@ -48,50 +49,11 @@ lazy_static::lazy_static! {
     pub static ref G : BigUint = 2_u32.to_biguint().unwrap();
 }
 
-// The modular_exponentiation() function
-// takes three identical types
-// (which get cast to BigInt), and returns a BigInt:
-pub fn modular_exponentiation<T: ToBigUint>(n: &T, e: &T, m: &T) -> BigUint {
-    // Convert n, e, and m to BigInt:
-    let n = n.to_biguint().unwrap();
-    let e = e.to_biguint().unwrap();
-    let m = m.to_biguint().unwrap();
-
-    // Sanity check:  Verify that the exponent is not negative:
-    assert!(e >= Zero::zero());
-
-    // As most modular exponentiations do, return 1 if the exponent is 0:
-    if e == Zero::zero() {
-        return One::one();
-    }
-
-    // Now do the modular exponentiation algorithm:
-    let mut result: BigUint = One::one();
-    let mut base = n % &m;
-    let mut exp = e;
-
-    // Loop until we can return out result:
-    loop {
-        if &exp % 2u32 == One::one() {
-            result *= &base;
-            result %= &m;
-        }
-
-        if exp == One::one() {
-            return result;
-        }
-
-        exp /= 2u32;
-        base *= base.clone();
-        base %= &m;
-    }
-}
-
 pub fn diffie_hellman(p: BigUint, g: BigUint, a: BigUint, b: BigUint) -> BigUint {
-    let a_exp = modular_exponentiation(&g, &a, &p);
-    let b_exp = modular_exponentiation(&g, &b, &p);
-    let s1 = modular_exponentiation(&b_exp, &a, &p);
-    let s2 = modular_exponentiation(&a_exp, &b, &p);
+    let a_exp = cryptopal_util::modular_exponentiation(&g, &a, &p);
+    let b_exp = cryptopal_util::modular_exponentiation(&g, &b, &p);
+    let s1 = cryptopal_util::modular_exponentiation(&b_exp, &a, &p);
+    let s2 = cryptopal_util::modular_exponentiation(&a_exp, &b, &p);
     assert_eq!(s1, s2);
     s1
 }

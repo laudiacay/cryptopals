@@ -1,5 +1,7 @@
 use anyhow::Result;
 use hex;
+use num::bigint::ToBigUint;
+use num::{BigUint, One, Zero};
 use std::fs::File;
 use std::io::Read;
 
@@ -89,6 +91,45 @@ pub fn current_unix_timestamp() -> u32 {
         .duration_since(UNIX_EPOCH)
         .unwrap()
         .as_secs() as u32
+}
+
+// The modular_exponentiation() function
+// takes three identical types
+// (which get cast to BigInt), and returns a BigInt:
+pub fn modular_exponentiation<T: ToBigUint>(n: &T, e: &T, m: &T) -> BigUint {
+    // Convert n, e, and m to BigInt:
+    let n = n.to_biguint().unwrap();
+    let e = e.to_biguint().unwrap();
+    let m = m.to_biguint().unwrap();
+
+    // Sanity check:  Verify that the exponent is not negative:
+    assert!(e >= Zero::zero());
+
+    // As most modular exponentiations do, return 1 if the exponent is 0:
+    if e == Zero::zero() {
+        return One::one();
+    }
+
+    // Now do the modular exponentiation algorithm:
+    let mut result: BigUint = One::one();
+    let mut base = n % &m;
+    let mut exp = e;
+
+    // Loop until we can return out result:
+    loop {
+        if &exp % 2u32 == One::one() {
+            result *= &base;
+            result %= &m;
+        }
+
+        if exp == One::one() {
+            return result;
+        }
+
+        exp /= 2u32;
+        base *= base.clone();
+        base %= &m;
+    }
 }
 
 #[cfg(test)]

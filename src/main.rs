@@ -7,7 +7,8 @@ pub mod diffie_hellman;
 pub mod englishness;
 pub mod mersenne_twister;
 pub mod pkcs7;
-mod random_things;
+pub mod random_things;
+pub mod rsa;
 pub mod sha1;
 pub mod srp;
 

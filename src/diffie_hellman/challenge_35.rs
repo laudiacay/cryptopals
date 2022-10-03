@@ -4,11 +4,13 @@ use crate::aes_fun::{
     cbc::{decrypt, encrypt},
     Iv, Key,
 };
-use crate::diffie_hellman::{modular_exponentiation, G, P};
+use crate::diffie_hellman::{G, P};
 use crate::random_things::sixteen_random_bytes;
 use crate::sha1::sha1;
+use num::bigint::ToBigUint;
 
 use crate::aes_fun::cbc;
+use crate::cryptopal_util;
 use num::bigint::RandBigInt;
 use num::{BigUint, One, Zero};
 
@@ -26,7 +28,7 @@ impl A {
 
         let rng = &mut rand::thread_rng();
         let secret_a = rng.gen_biguint_below(&p);
-        let big_a = modular_exponentiation(&g, &secret_a, &p);
+        let big_a = cryptopal_util::modular_exponentiation(&g, &secret_a, &p);
         A {
             p,
             g,
@@ -39,7 +41,7 @@ impl A {
 
     fn get_handshake(&mut self, big_b: BigUint) {
         self.big_b = Some(big_b.clone());
-        self.s = Some(modular_exponentiation(
+        self.s = Some(cryptopal_util::modular_exponentiation(
             &big_b,
             &self.secret_a.clone(),
             &self.p.clone(),
@@ -88,12 +90,12 @@ impl B {
     fn new(p: BigUint, g: BigUint, big_a: BigUint) -> B {
         let rng = &mut rand::thread_rng();
         let secret_b = rng.gen_biguint_below(&p);
-        let big_b = modular_exponentiation(&g, &secret_b, &p);
-        let s = modular_exponentiation(&big_a, &secret_b, &p);
+        let big_b = cryptopal_util::modular_exponentiation(&g, &secret_b, &p);
+        let s = cryptopal_util::modular_exponentiation(&big_a, &secret_b, &p);
         B {
             _secret_b: secret_b,
-            big_b,
-            s,
+            big_b: big_b.to_biguint().unwrap(),
+            s: s.to_biguint().unwrap(),
         }
     }
 
