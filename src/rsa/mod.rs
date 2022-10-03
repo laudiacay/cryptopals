@@ -1,3 +1,5 @@
+pub mod challenge_40;
+
 // Implement RSA
 use num::bigint::ToBigUint;
 use num_primes::Generator;
@@ -24,6 +26,7 @@ use num_primes::Generator;
 // Repeat with bignum primes (keep e=3).
 // Finally, to encrypt a string, do something cheesy, like convert the string to hex and put "0x" on the front of it to turn it into a number. The math cares not how stupidly you feed it strings.
 
+use crate::cryptopal_util;
 use crate::cryptopal_util::modular_exponentiation;
 use num::{BigInt, BigUint, One, Zero};
 
@@ -34,6 +37,12 @@ pub struct RsaKey {
     pub modulus: BigUint,
     pub public_exponent: BigUint,
     pub private_exponent: BigUint,
+}
+
+#[derive(Debug)]
+pub struct RsaPubKey {
+    pub modulus: BigUint,
+    pub public_exponent: BigUint,
 }
 
 impl RsaKey {
@@ -66,6 +75,12 @@ impl RsaKey {
             }
         }
     }
+    pub fn get_public_key(&self) -> RsaPubKey {
+        RsaPubKey {
+            modulus: self.modulus.clone(),
+            public_exponent: self.public_exponent.clone(),
+        }
+    }
 
     pub fn encrypt(&self, m: &BigUint) -> BigUint {
         modular_exponentiation(m, &self.public_exponent, &self.modulus)
@@ -73,15 +88,28 @@ impl RsaKey {
             .unwrap()
     }
 
+    pub fn encrypt_string(&self, s: &str) -> Vec<u8> {
+        let bytes = cryptopal_util::ascii_to_bytes(s).unwrap();
+        let biguint = cryptopal_util::bytes_to_biguint(&bytes);
+        let encrypted = self.encrypt(&biguint);
+        cryptopal_util::biguint_to_bytes(&encrypted)
+    }
+
     pub fn decrypt(&self, c: &BigUint) -> BigUint {
         modular_exponentiation(c, &self.private_exponent, &self.modulus)
             .to_biguint()
             .unwrap()
     }
+
+    pub fn decrypt_bytes_to_string(&self, c: &[u8]) -> String {
+        let biguint = cryptopal_util::bytes_to_biguint(c);
+        let decrypted = self.decrypt(&biguint);
+        let bytes = cryptopal_util::biguint_to_bytes(&decrypted);
+        cryptopal_util::bytes_to_ascii(&bytes).unwrap()
+    }
 }
 
 fn egcd(a: &BigUint, b: &BigUint) -> (BigUint, BigInt, BigInt) {
-    println!("egcd({}, {})", a, b);
     let (mut old_r, mut r): (BigInt, BigInt) = (a.clone().into(), b.clone().into());
     let (mut old_s, mut s) = (BigInt::one(), BigInt::zero());
     let (mut old_t, mut t) = (BigInt::zero(), BigInt::one());
@@ -106,7 +134,6 @@ fn egcd(a: &BigUint, b: &BigUint) -> (BigUint, BigInt, BigInt) {
 
 fn invmod(a: BigUint, m: BigUint) -> Option<BigUint> {
     let (g, x, _y) = egcd(&a, &m);
-    println!("g: {}, x: {}, y: {}", g, x, _y);
     if g != BigUint::one() {
         return None;
     }

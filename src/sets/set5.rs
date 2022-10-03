@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod tests {
-    use crate::diffie_hellman;
     use crate::rsa::RsaKey;
+    use crate::{diffie_hellman, rsa};
     use num::BigUint;
 
     #[test]
@@ -71,6 +71,6 @@ mod tests {
 
     #[test]
     fn s5c40_implement_e_3_rsa_broadcast_attack() {
-        unimplemented!();
+        rsa::challenge_40::attack()
     }
 }

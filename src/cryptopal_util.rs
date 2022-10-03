@@ -132,6 +132,20 @@ pub fn modular_exponentiation<T: ToBigUint>(n: &T, e: &T, m: &T) -> BigUint {
     }
 }
 
+pub fn bytes_to_biguint(bytes: &[u8]) -> BigUint {
+    //  Convert the bytes to a hex string:
+    let hex_string = bytes_to_hex(bytes);
+    // interpret them as a hex number:
+    BigUint::parse_bytes(hex_string.as_bytes(), 16).unwrap()
+}
+
+pub fn biguint_to_bytes(biguint: &BigUint) -> Vec<u8> {
+    // Convert the biguint to a hex string:
+    let hex_string = format!("{:x}", biguint);
+    // Convert the hex string to bytes:
+    hex_to_bytes(hex_string).unwrap()
+}
+
 #[cfg(test)]
 mod tests {
     use crate::cryptopal_util::{ascii_to_bytes, hamming_distance};
