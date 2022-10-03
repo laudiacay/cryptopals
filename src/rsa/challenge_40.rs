@@ -5,19 +5,20 @@
 
 use crate::rsa::RsaPubKey;
 use crate::{cryptopal_util, rsa};
+use anyhow::{anyhow, Result};
 use num::BigUint;
 
-fn oracle(message: String) -> (Vec<u8>, RsaPubKey) {
+fn oracle(message: String) -> Result<(Vec<u8>, RsaPubKey)> {
     let key = rsa::RsaKey::new(512);
-    (key.encrypt_string(&message), key.get_public_key())
+    Ok((key.encrypt_string(&message)?, key.get_public_key()))
 }
 
-pub fn attack() {
+pub fn attack() -> Result<()> {
     // Get three ciphertexts
     // Capturing any 3 of the ciphertexts and their corresponding pubkeys
-    let (c_1, n_1) = oracle("i love doggsss".to_string());
-    let (c_2, n_2) = oracle("i love doggsss".to_string());
-    let (c_3, n_3) = oracle("i love doggsss".to_string());
+    let (c_1, n_1) = oracle("i love doggsss".to_string())?;
+    let (c_2, n_2) = oracle("i love doggsss".to_string())?;
+    let (c_3, n_3) = oracle("i love doggsss".to_string())?;
     // Using the CRT to solve for the number represented by the three ciphertexts (which are residues mod their respective pubkeys)
     let m_s_1 = n_2.modulus.clone() * n_3.modulus.clone();
     let m_s_2 = n_1.modulus.clone() * n_3.modulus.clone();
@@ -28,9 +29,12 @@ pub fn attack() {
     let c_2 = BigUint::from_bytes_be(&c_2);
     let c_3 = BigUint::from_bytes_be(&c_3);
 
-    let first_inverse = rsa::invmod(m_s_1.clone(), n_1.modulus).unwrap();
-    let second_inverse = rsa::invmod(m_s_2.clone(), n_2.modulus).unwrap();
-    let third_inverse = rsa::invmod(m_s_3.clone(), n_3.modulus).unwrap();
+    let first_inverse =
+        rsa::invmod(m_s_1.clone(), n_1.modulus).ok_or_else(|| anyhow!("Failed to get inverse"))?;
+    let second_inverse =
+        rsa::invmod(m_s_2.clone(), n_2.modulus).ok_or_else(|| anyhow!("Failed to get inverse"))?;
+    let third_inverse =
+        rsa::invmod(m_s_3.clone(), n_3.modulus).ok_or_else(|| anyhow!("Failed to get inverse"))?;
 
     let term_1 = c_1 * m_s_1 * first_inverse;
     let term_2 = c_2 * m_s_2 * second_inverse;
@@ -41,6 +45,7 @@ pub fn attack() {
     let cube_root = m.cbrt();
     // convert to string
     let bytes = cryptopal_util::biguint_to_bytes(&cube_root);
-    let message = cryptopal_util::bytes_to_ascii(&bytes).unwrap();
+    let message = cryptopal_util::bytes_to_ascii(&bytes)?;
     assert_eq!(message, "i love doggsss");
+    Ok(())
 }

@@ -1,5 +1,7 @@
 pub mod challenge_40;
+pub mod challenge_41;
 
+use anyhow::{anyhow, Result};
 // Implement RSA
 use num::bigint::ToBigUint;
 use num_primes::Generator;
@@ -82,30 +84,30 @@ impl RsaKey {
         }
     }
 
-    pub fn encrypt(&self, m: &BigUint) -> BigUint {
+    pub fn encrypt(&self, m: &BigUint) -> Result<BigUint> {
         modular_exponentiation(m, &self.public_exponent, &self.modulus)
             .to_biguint()
-            .unwrap()
+            .ok_or_else(|| anyhow!("Failed to convert to BigUint"))
     }
 
-    pub fn encrypt_string(&self, s: &str) -> Vec<u8> {
-        let bytes = cryptopal_util::ascii_to_bytes(s).unwrap();
+    pub fn encrypt_string(&self, s: &str) -> Result<Vec<u8>> {
+        let bytes = cryptopal_util::ascii_to_bytes(s)?;
         let biguint = cryptopal_util::bytes_to_biguint(&bytes);
-        let encrypted = self.encrypt(&biguint);
-        cryptopal_util::biguint_to_bytes(&encrypted)
+        let encrypted = self.encrypt(&biguint)?;
+        Ok(cryptopal_util::biguint_to_bytes(&encrypted))
     }
 
-    pub fn decrypt(&self, c: &BigUint) -> BigUint {
+    pub fn decrypt(&self, c: &BigUint) -> Result<BigUint> {
         modular_exponentiation(c, &self.private_exponent, &self.modulus)
             .to_biguint()
-            .unwrap()
+            .ok_or_else(|| anyhow!("Error converting to biguint"))
     }
 
-    pub fn decrypt_bytes_to_string(&self, c: &[u8]) -> String {
+    pub fn decrypt_bytes_to_string(&self, c: &[u8]) -> Result<String> {
         let biguint = cryptopal_util::bytes_to_biguint(c);
-        let decrypted = self.decrypt(&biguint);
+        let decrypted = self.decrypt(&biguint)?;
         let bytes = cryptopal_util::biguint_to_bytes(&decrypted);
-        cryptopal_util::bytes_to_ascii(&bytes).unwrap()
+        cryptopal_util::bytes_to_ascii(&bytes)
     }
 }
 

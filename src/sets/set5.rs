@@ -55,22 +55,22 @@ mod tests {
             public_exponent: BigUint::from(7u64),
             private_exponent: BigUint::from(3u64),
         };
-        let c = key.encrypt(&m);
+        let c = key.encrypt(&m).unwrap();
         assert_eq!(c, BigUint::from(29u64));
-        let m2 = key.decrypt(&c);
+        let m2 = key.decrypt(&c).unwrap();
         assert_eq!(m2, m);
         for i in 0..30 {
             println!("iteration {}!", i);
             let key = RsaKey::new(20);
             println!("key: {:?}", key);
-            let c = key.encrypt(&m);
-            let m2 = key.decrypt(&c);
+            let c = key.encrypt(&m).unwrap();
+            let m2 = key.decrypt(&c).unwrap();
             assert_eq!(m, m2);
         }
     }
 
     #[test]
     fn s5c40_implement_e_3_rsa_broadcast_attack() {
-        rsa::challenge_40::attack()
+        rsa::challenge_40::attack().unwrap()
     }
 }

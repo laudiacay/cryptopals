@@ -1,8 +1,10 @@
 #[cfg(test)]
 mod tests {
+    use crate::rsa;
+
     #[test]
     fn s6c41_implement_unpadded_message_recovery_oracle() {
-        unimplemented!();
+        rsa::challenge_41::attack().unwrap()
     }
 
     #[test]
