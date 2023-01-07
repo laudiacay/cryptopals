@@ -3,6 +3,8 @@ mod tests {
     use crate::rsa::RsaKey;
     use crate::{diffie_hellman, rsa, srp};
     use num::BigUint;
+    use num::Zero;
+
 
     #[test]
     fn s5c33_implement_diffie_hellman() {
@@ -37,7 +39,10 @@ mod tests {
 
     #[test]
     fn s5c37_break_srp_with_zero_key() {
-        unimplemented!();
+        srp::challenge_37::do_srp("claudia@lovescomput.ers".to_string(), "hunter2".to_string(), BigUint::zero()).unwrap();
+        let n = crate::diffie_hellman::P.clone();
+        srp::challenge_37::do_srp("claudia@lovescomput.ers".to_string(), "hunter2".to_string(), n.clone()).unwrap();
+        srp::challenge_37::do_srp("claudia@lovescomput.ers".to_string(), "hunter2".to_string(), n.clone()*&n).unwrap();
     }
 
     #[test]
