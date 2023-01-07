@@ -14,8 +14,8 @@
 //   social: '555-55-5555',
 //}
 
+use crate::hashes::sha1::sha1;
 use crate::rsa::{RsaKey, RsaPubKey};
-use crate::sha1::sha1;
 use crate::{cryptopal_util, rsa};
 use anyhow::{anyhow, Result};
 use num::BigUint;

@@ -1,4 +1,4 @@
-use crate::random_things::{MY_RANDOM_IV, MY_RANDOM_KEY};
+use crate::random_things::MY_RANDOM_KEY;
 use crate::{aes_fun, cryptopal_util};
 use aes_fun::{Iv, Key};
 use anyhow::{anyhow, Result};
@@ -6,13 +6,13 @@ use anyhow::{anyhow, Result};
 fn oracle(input_bytes: &[u8]) -> Result<Vec<u8>> {
     // ensure the input is ascii
     let _ = cryptopal_util::bytes_to_ascii(input_bytes)?;
-    aes_fun::cbc::encrypt(input_bytes, Key(&MY_RANDOM_KEY), Iv(&MY_RANDOM_IV))
+    aes_fun::cbc::encrypt(input_bytes, Key(&MY_RANDOM_KEY), Iv(&MY_RANDOM_KEY))
 }
 
 fn target(input_bytes: &[u8]) -> Result<bool> {
     // decrypt the string
     let decrypted_bytes =
-        aes_fun::cbc::decrypt_no_unpad(input_bytes, Key(&MY_RANDOM_KEY), Iv(&MY_RANDOM_IV));
+        aes_fun::cbc::decrypt_no_unpad(input_bytes, Key(&MY_RANDOM_KEY), Iv(&MY_RANDOM_KEY));
     let decrypted_string = unsafe { String::from_utf8_unchecked(decrypted_bytes) };
     if decrypted_string.is_ascii() {
         // return whether it contains the characters ";admin=true;"
@@ -53,16 +53,13 @@ pub fn attack() -> Result<()> {
         Err(decrypted_bytes_error) => {
             let dec_bytes_string = decrypted_bytes_error.to_string();
             let dec_bytes = dec_bytes_string.as_bytes();
-            println!("decrypted bytes: {:?}", dec_bytes);
             // now we have the decrypted bytes, we need to extract the key
             let p_1_prime = &dec_bytes[0..16];
             let p_3_prime = &dec_bytes[32..48];
             let key = cryptopal_util::fixed_xor(p_1_prime, p_3_prime);
-            println!("key: {:?}", key);
             // copy my_random_key into a buffer
             let mut my_random_key_buffer = [0; 16];
             my_random_key_buffer.copy_from_slice(&MY_RANDOM_KEY);
-            println!("MY_RANDOM_KEY: {:?}", my_random_key_buffer);
             // now we have the key, we need to decrypt the original bytes
             let decrypted_bytes = aes_fun::cbc::decrypt(&encrypted_bytes, Key(&key), Iv(&key))?;
             // now we have the decrypted bytes, we need to check if they contain ";admin=true;"

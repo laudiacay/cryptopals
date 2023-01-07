@@ -1,5 +1,6 @@
 pub mod challenge_40;
 pub mod challenge_41;
+pub mod challenge_42;
 
 use anyhow::{anyhow, Result};
 // Implement RSA

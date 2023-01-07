@@ -66,7 +66,7 @@ fn encode_profile(input: &HashMap<String, String>) -> String {
 // email=foo@bar.com&uid=10&role=user
 // Your "profile_for" function should not allow encoding metacharacters (& and =). Eat them, quote them, whatever you want to do, but don't let people set their email address to "foo@bar.com&role=admin".
 fn profile_for(email: &str) -> HashMap<String, String> {
-    let email = email.replace('&', "").replace('=', "");
+    let email = email.replace(['&', '='], "");
     let mut h = HashMap::new();
     h.insert("email".to_string(), email);
     h.insert("uid".to_string(), "10".to_string());

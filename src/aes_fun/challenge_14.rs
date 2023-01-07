@@ -155,7 +155,7 @@ pub fn attack() -> Vec<u8> {
                 let mut my_input = vec![];
                 my_input.extend_from_slice(&aaaa_for_prefix_padding);
                 my_input.extend_from_slice(target_plaintext_block_prefix);
-                my_input.extend_from_slice(&[i as u8; 1]);
+                my_input.extend_from_slice(&[i; 1]);
                 (
                     oracle(&my_input)[prefix_plus_padding_offset..prefix_plus_padding_offset + 16]
                         .to_vec(),

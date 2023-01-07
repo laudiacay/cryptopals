@@ -50,7 +50,7 @@ fn keystream(key: Key, nonce: u64, start_iv: u64, bytes_to_produce: usize) -> (u
         buf[0..8].copy_from_slice(&nonce.to_le_bytes());
         // write little endian iv to buf
         buf[8..].clone_from_slice(&iv.to_le_bytes());
-        println!("{:?}", buf);
+        println!("{buf:?}");
         cipher.encrypt_block(GenericArray::from_mut_slice(&mut buf));
         keystream[i * 16..(i + 1) * 16].copy_from_slice(&buf);
         iv += 1;

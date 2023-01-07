@@ -79,7 +79,7 @@ pub fn attack() -> Vec<u8> {
             .map(|i| {
                 let mut my_input = [b'A'; 16];
                 my_input[..15].clone_from_slice(target_plaintext_block_prefix);
-                my_input[15] = i as u8;
+                my_input[15] = i;
                 (oracle(&my_input)[..16].to_vec(), i)
             })
             .collect::<HashMap<Vec<u8>, u8>>();

@@ -141,7 +141,7 @@ pub fn bytes_to_biguint(bytes: &[u8]) -> BigUint {
 
 pub fn biguint_to_bytes(biguint: &BigUint) -> Vec<u8> {
     // Convert the biguint to a hex string:
-    let hex_string = format!("{:x}", biguint);
+    let hex_string = format!("{biguint:x}");
     // Convert the hex string to bytes:
     hex_to_bytes(hex_string).unwrap()
 }

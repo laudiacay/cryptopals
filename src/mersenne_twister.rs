@@ -75,7 +75,7 @@ impl MersenneTwister {
             if (x % Wrapping(2_u32)) != Wrapping(0_u32) {
                 x_a ^= A;
             }
-            self.mt[i] = self.mt[((i + M as usize) % N) as usize] ^ x_a;
+            self.mt[i] = self.mt[((i + M as usize) % N)] ^ x_a;
         }
         self.index = 0;
     }

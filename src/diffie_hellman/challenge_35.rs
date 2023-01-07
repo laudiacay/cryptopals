@@ -5,8 +5,8 @@ use crate::aes_fun::{
     Iv, Key,
 };
 use crate::diffie_hellman::{G, P};
+use crate::hashes::sha1::sha1;
 use crate::random_things::sixteen_random_bytes;
-use crate::sha1::sha1;
 use num::bigint::ToBigUint;
 
 use crate::aes_fun::cbc;
@@ -76,7 +76,7 @@ impl A {
         let (encrypted, iv) = enc_msg.split_at(enc_msg.len() - 16);
         let msg = decrypt(encrypted, Key(&key), Iv(iv)).unwrap();
         let msg = String::from_utf8(msg).unwrap();
-        println!("A got message: {}", msg);
+        println!("A got message: {msg}");
         msg
     }
 }
@@ -108,7 +108,7 @@ impl B {
         let (encrypted, iv) = enc_msg.split_at(enc_msg.len() - 16);
         let msg = decrypt(encrypted, Key(&key), Iv(iv)).unwrap();
         let msg_str = String::from_utf8(msg.clone()).unwrap();
-        println!("B got message: {}", msg_str);
+        println!("B got message: {msg_str}");
         // re encrypt
         // AES-CBC(SHA1(s)[0:16], iv=random(16), A's msg) + iv
         let iv = sixteen_random_bytes();

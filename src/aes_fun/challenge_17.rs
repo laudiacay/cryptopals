@@ -77,12 +77,12 @@ pub fn challenge_17_attack() -> Result<Vec<u8>> {
                         let padding_val: u8 = (16 - byte) as u8;
                         new_ciphertext[byte - 1] ^= 1;
                         if decryption_oracle(&new_ciphertext).is_ok() {
-                            blank_it_out[byte] = padding_val ^ (change as u8);
+                            blank_it_out[byte] = padding_val ^ change;
                             decrypted[byte] = blank_it_out[byte] ^ attack_block[byte];
                             break;
                         }
                     } else {
-                        blank_it_out[byte] = 16 ^ (change as u8);
+                        blank_it_out[byte] = 16 ^ change;
                         decrypted[byte] = blank_it_out[byte] ^ attack_block[byte];
                         break;
                     }

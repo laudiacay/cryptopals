@@ -9,9 +9,9 @@ pub mod mersenne_twister;
 pub mod pkcs7;
 pub mod random_things;
 pub mod rsa;
-pub mod sha1;
 pub mod srp;
 
+mod hashes;
 mod sets;
 
 fn main() {

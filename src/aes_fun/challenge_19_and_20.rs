@@ -56,7 +56,7 @@ pub fn attack() -> Result<Vec<u8>> {
         println!();
     }
     let parse_dist = cryptopal_util::bytes_to_ascii(&dist)?;
-    println!("DIST: {}", parse_dist);
+    println!("DIST: {parse_dist}");
     println!(
         "{}",
         cryptopal_util::bytes_to_ascii(&patched_decrypted[..24 * 30])?
