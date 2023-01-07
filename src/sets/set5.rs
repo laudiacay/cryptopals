@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod tests {
     use crate::rsa::RsaKey;
-    use crate::{diffie_hellman, rsa};
+    use crate::{diffie_hellman, rsa, srp};
     use num::BigUint;
 
     #[test]
@@ -32,7 +32,7 @@ mod tests {
 
     #[test]
     fn s5c36_implement_srp() {
-        unimplemented!();
+        srp::challenge_36::do_srp("claudia@lovescomput.ers".to_string(), "hunter2".to_string()).unwrap();
     }
 
     #[test]

@@ -9,7 +9,7 @@ pub fn sha256(msg: &[u8]) -> String {
         .finalize()
         .to_vec()
         .iter()
-        .map(|x| format!("{:02x}", x))
+        .map(|x| format!("{x:02x}"))
         .collect()
 }
 

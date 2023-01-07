@@ -22,17 +22,19 @@ pub fn verify_mac(key: &[u8], msg: &[u8], mac: &[u8]) -> bool {
 
 pub fn hmac_sha1(key: &[u8], msg: &[u8]) -> [u8; 20] {
     let mut hasher = sha1_smol::Sha1::new();
-    let key = if key.len() > 64 {
-        // create a vec from the hash of the key
-        let mut key_vec = vec![0; 20];
-        key_vec.copy_from_slice(&sha1(&key));
-        key_vec
-    } else if key.len() < 64 {
-        let mut new_key = vec![0; 64];
-        new_key[..key.len()].copy_from_slice(&key);
-        new_key
-    } else {
-        key.to_vec()
+    let key = match key.len() {
+        ..=63 => {
+            let mut new_key = vec![0; 64];
+            new_key[..key.len()].copy_from_slice(key);
+            new_key
+        }
+        64.. => {
+            // create a vec from the hash of the key
+            let mut key_vec = vec![0; 20];
+            key_vec.copy_from_slice(&sha1(key));
+            key_vec
+        }
+        _ => panic!("key length is weird"),
     };
     let o_key_pad = key.iter().map(|&x| x ^ 0x5c).collect::<Vec<_>>();
     let i_key_pad = key.iter().map(|&x| x ^ 0x36).collect::<Vec<_>>();

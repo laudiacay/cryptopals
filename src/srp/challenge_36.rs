@@ -67,7 +67,7 @@ impl S {
     }
 }
 
-fn do_srp(_email: String, password: String) -> Result<()> {
+pub fn do_srp(_email: String, password: String) -> Result<()> {
     // C & S
     // Agree on N=[NIST Prime], g=2, k=3, I (email), P (password)
     let mut s = S::new();
@@ -95,7 +95,8 @@ fn do_srp(_email: String, password: String) -> Result<()> {
 
     // S, C
     // Compute string u_h = SHA256(A|B), u = integer of u_h
-    let u_h = sha256(format!("{}{}", c.big_a.as_ref().unwrap(), s.big_b.as_ref().unwrap()).as_bytes());
+    let u_h =
+        sha256(format!("{}{}", c.big_a.as_ref().unwrap(), s.big_b.as_ref().unwrap()).as_bytes());
     let u = get_bigint_from_hash(&u_h);
 
     // C
@@ -119,10 +120,10 @@ fn do_srp(_email: String, password: String) -> Result<()> {
 
     // C->S
     // Send HMAC-SHA256(K, salt)
-    let c_hmac = hmac_sha256(&c.k.unwrap().as_bytes(), s.salt.to_string().as_bytes());
+    let c_hmac = hmac_sha256(c.k.unwrap().as_bytes(), s.salt.to_string().as_bytes());
     // S->C
     // Send "OK" if HMAC-SHA256(K, salt) validates
-    let s_hmac = hmac_sha256(&s.k.unwrap().as_bytes(), s.salt.to_string().as_bytes());
+    let s_hmac = hmac_sha256(s.k.unwrap().as_bytes(), s.salt.to_string().as_bytes());
     assert_eq!(c_hmac, s_hmac);
 
     Ok(())

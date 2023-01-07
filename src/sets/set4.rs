@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use crate::{aes_fun, cryptopal_util, sha1};
+    use crate::{aes_fun, cryptopal_util, hashes::sha1};
 
     #[test]
     fn s4c25_break_randomaccess_readwrite() {
